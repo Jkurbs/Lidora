@@ -1,0 +1,6 @@
+framework module Pods_Lidora {
+  umbrella header "Pods-Lidora-umbrella.h"
+
+  export *
+  module * { export * }
+}
