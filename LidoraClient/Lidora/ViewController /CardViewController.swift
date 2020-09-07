@@ -8,6 +8,8 @@
 import UIKit
 
 class CardViewController: UIViewController {
+    
+    var label = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,17 +19,11 @@ class CardViewController: UIViewController {
     func setupViews() {
         view.layer.cornerRadius = 10.0
         view.backgroundColor = UIColor(white: 0.5, alpha: 1.0)
+        label.text = "Add to card"
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        label.textColor = .white
+        label.frame = CGRect(x: 0, y: 5, width: view.frame.width, height: 60)
+        view.addSubview(label)
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

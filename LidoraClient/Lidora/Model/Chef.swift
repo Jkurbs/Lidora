@@ -1,5 +1,5 @@
 //
-//  User.swift
+//  Chef.swift
 //  Lidora
 //
 //  Created by Kerby Jean on 9/6/20.
@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct User {
+struct Chef {
+    let id: String
     let firstName: String
     let lastName: String
     let email: String
@@ -36,4 +37,15 @@ struct Items {
     let description: String?
     let price: Int
     let quantity: Int 
+}
+
+extension Chef: Hashable {
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Chef, rhs: Chef) -> Bool {
+        lhs.id == rhs.id
+    }
 }

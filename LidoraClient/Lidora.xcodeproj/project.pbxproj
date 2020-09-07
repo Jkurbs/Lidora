@@ -15,9 +15,10 @@
 		6D572E9524F677AE0077A7A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6D572E9424F677AE0077A7A0 /* Assets.xcassets */; };
 		6D572E9824F677AE0077A7A0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6D572E9624F677AE0077A7A0 /* LaunchScreen.storyboard */; };
 		6DA4DA982505943B0048A3CE /* CardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA4DA972505943B0048A3CE /* CardViewController.swift */; };
+		6DA4DA9B2505B11E0048A3CE /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA4DA9A2505B11E0048A3CE /* LocationView.swift */; };
 		6DA82D822502992200EF8261 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6DA82D812502992100EF8261 /* GoogleService-Info.plist */; };
 		6DC0EE9725058AE0003440A8 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC0EE9625058AE0003440A8 /* MainViewController.swift */; };
-		6DC0EE9A25058C74003440A8 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC0EE9925058C74003440A8 /* User.swift */; };
+		6DC0EE9A25058C74003440A8 /* Chef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC0EE9925058C74003440A8 /* Chef.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,9 +32,10 @@
 		6D572E9724F677AE0077A7A0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6D572E9924F677AE0077A7A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6DA4DA972505943B0048A3CE /* CardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewController.swift; sourceTree = "<group>"; };
+		6DA4DA9A2505B11E0048A3CE /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		6DA82D812502992100EF8261 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = SOURCE_ROOT; };
 		6DC0EE9625058AE0003440A8 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
-		6DC0EE9925058C74003440A8 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		6DC0EE9925058C74003440A8 /* Chef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chef.swift; sourceTree = "<group>"; };
 		81A1E47AE9FA2C55C3CE715B /* Pods-Lidora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora.debug.xcconfig"; path = "Target Support Files/Pods-Lidora/Pods-Lidora.debug.xcconfig"; sourceTree = "<group>"; };
 		D505CB90AB7BBAB0241D080F /* Pods-Lidora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora.release.xcconfig"; path = "Target Support Files/Pods-Lidora/Pods-Lidora.release.xcconfig"; sourceTree = "<group>"; };
 		E4F2BF5B6420209FE8CEB195 /* Pods_Lidora.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Lidora.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,7 @@
 		6D572E8A24F677AB0077A7A0 /* Lidora */ = {
 			isa = PBXGroup;
 			children = (
+				6DA4DA992505B0F00048A3CE /* Views */,
 				6DC0EE9825058C5F003440A8 /* Model */,
 				6DC0EE9525058AC1003440A8 /* ViewController  */,
 				6D3F96CF24FDC8D2000C1BBA /* Lidora.entitlements */,
@@ -104,6 +107,14 @@
 			path = Lidora;
 			sourceTree = "<group>";
 		};
+		6DA4DA992505B0F00048A3CE /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6DA4DA9A2505B11E0048A3CE /* LocationView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		6DC0EE9525058AC1003440A8 /* ViewController  */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,7 +127,7 @@
 		6DC0EE9825058C5F003440A8 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				6DC0EE9925058C74003440A8 /* User.swift */,
+				6DC0EE9925058C74003440A8 /* Chef.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -240,7 +251,8 @@
 				6D572E8C24F677AB0077A7A0 /* AppDelegate.swift in Sources */,
 				6DA4DA982505943B0048A3CE /* CardViewController.swift in Sources */,
 				6D572E8E24F677AB0077A7A0 /* SceneDelegate.swift in Sources */,
-				6DC0EE9A25058C74003440A8 /* User.swift in Sources */,
+				6DA4DA9B2505B11E0048A3CE /* LocationView.swift in Sources */,
+				6DC0EE9A25058C74003440A8 /* Chef.swift in Sources */,
 				6DC0EE9725058AE0003440A8 /* MainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -33,7 +33,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         curtainController.curtain.minHeightCoefficient = 0.1
         
         curtainController.curtain.showsHandleIndicator = false
-        
+        curtainController.curtain.bottomBounce = false
+        curtainController.curtain.topBounce = false
 //        curtainController.curtainDelegate = entriesViewController
         curtainController.modalPresentationStyle = .fullScreen
 
