@@ -11,7 +11,7 @@ class LocationView: UIView {
     
     let imageView = UIImageView()
     let label = UILabel()
-    let button = UIButton()
+    let chevroImageView = UIImageView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,11 +24,13 @@ class LocationView: UIView {
     
     func setupViews() {
         
-        backgroundColor = .white
+        translatesAutoresizingMaskIntoConstraints = false 
+        
+        backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
         
         addSubview(imageView)
         let originalImage = UIImage(systemName: "location")
-        let image = originalImage?.withTintColor(.darkText, renderingMode: .alwaysOriginal)
+        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
         imageView.image = image
 
         imageView.contentMode = .scaleAspectFit
@@ -37,15 +39,16 @@ class LocationView: UIView {
         addSubview(label)
         label.text = "14212 NE 3RD CT"
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
         
-        addSubview(button)
-        let chevronOriginalImage = UIImage(systemName: "chevron.right")
-        let chevronImage = chevronOriginalImage?.withTintColor(.darkText, renderingMode: .alwaysOriginal)
-        button.setImage(chevronImage, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-
         
+        addSubview(chevroImageView)
+        let chevronOriginalImage = UIImage(systemName: "chevron.down")
+        let chevronImage = chevronOriginalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        chevroImageView.image = chevronImage
+        chevroImageView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
             imageView.widthAnchor.constraint(equalToConstant: 20),
             imageView.heightAnchor.constraint(equalToConstant: 20),
@@ -53,15 +56,18 @@ class LocationView: UIView {
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             label.leftAnchor.constraint(equalTo: imageView.rightAnchor, constant: 5.0),
             label.heightAnchor.constraint(equalTo: heightAnchor),
-            button.widthAnchor.constraint(equalToConstant: 15),
-            button.heightAnchor.constraint(equalToConstant: 15),
-            button.centerYAnchor.constraint(equalTo: centerYAnchor),
-            button.leftAnchor.constraint(equalTo: label.rightAnchor, constant: 5),
-            
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            chevroImageView.widthAnchor.constraint(equalToConstant: 15),
+            chevroImageView.heightAnchor.constraint(equalToConstant: 15),
+            chevroImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            chevroImageView.leftAnchor.constraint(equalTo: label.rightAnchor, constant: 5),
         ])
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateViews(_:)), name: NSNotification.Name("userLocation"), object: self)
     }
     
-    func updateViews() {
-        
+    @objc func updateViews(_ address: String) {
+        print("Location received")
+        self.label.text = address
     }
 }

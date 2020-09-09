@@ -16,9 +16,12 @@ struct Chef {
     let dob: [String]
     let ssnLast4: String
     let ssn: String
+    let imageURL: String?
+    let thumbnailsURL: [String]
+    let description: String?
     let address: Address
     let ip: String
-    let menu: Menu
+    let menu: Menu?
 }
 
 struct Address {
@@ -28,11 +31,14 @@ struct Address {
     let state: String
 }
 
+
 struct Menu {
+    var id: String
     var items: [Items]
 }
 
 struct Items {
+    let image: String?
     let name: String
     let description: String?
     let price: Int
@@ -46,6 +52,17 @@ extension Chef: Hashable {
     }
     
     static func == (lhs: Chef, rhs: Chef) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+extension Menu: Hashable {
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Menu, rhs: Menu) -> Bool {
         lhs.id == rhs.id
     }
 }

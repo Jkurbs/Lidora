@@ -9,9 +9,13 @@ target 'Lidora' do
 
 pod 'Stripe'
 pod 'SweetCurtain'
+pod 'FormTextField'
+pod 'Firebase/Auth'
 pod 'Firebase/Firestore'
 pod 'Firebase/Storage'
 pod 'Firebase/Analytics'
 pod 'Firebase/Messaging'
+pod 'IGListKit', '~> 4.0.0'
+pod 'IQKeyboardManagerSwift'
 
 end

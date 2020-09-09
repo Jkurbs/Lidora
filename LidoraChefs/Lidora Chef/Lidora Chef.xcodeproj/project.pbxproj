@@ -13,9 +13,13 @@
 		6DA82D752500972000EF8261 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6DA82D732500972000EF8261 /* Main.storyboard */; };
 		6DA82D772500972300EF8261 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6DA82D762500972300EF8261 /* Assets.xcassets */; };
 		6DA82D7A2500972300EF8261 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6DA82D782500972300EF8261 /* LaunchScreen.storyboard */; };
+		767BA6D891BB05C243E4FBF2 /* Pods_Lidora_Chef.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AAE51C675A9B59E153D226D /* Pods_Lidora_Chef.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2AAE51C675A9B59E153D226D /* Pods_Lidora_Chef.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Lidora_Chef.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5722DC01A7DED56263B5B22A /* Pods-Lidora Chef.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora Chef.debug.xcconfig"; path = "Target Support Files/Pods-Lidora Chef/Pods-Lidora Chef.debug.xcconfig"; sourceTree = "<group>"; };
+		6D2D6672D8280A87DC569E98 /* Pods-Lidora Chef.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora Chef.release.xcconfig"; path = "Target Support Files/Pods-Lidora Chef/Pods-Lidora Chef.release.xcconfig"; sourceTree = "<group>"; };
 		6DA82D6A2500971F00EF8261 /* Lidora Chef.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Lidora Chef.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6DA82D6D2500972000EF8261 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6DA82D6F2500972000EF8261 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -31,17 +35,38 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				767BA6D891BB05C243E4FBF2 /* Pods_Lidora_Chef.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		33A38152DC0E72F95862C5AD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2AAE51C675A9B59E153D226D /* Pods_Lidora_Chef.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		51AAECB4C07CFCAD6ED4D4DD /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5722DC01A7DED56263B5B22A /* Pods-Lidora Chef.debug.xcconfig */,
+				6D2D6672D8280A87DC569E98 /* Pods-Lidora Chef.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		6DA82D612500971F00EF8261 = {
 			isa = PBXGroup;
 			children = (
 				6DA82D6C2500971F00EF8261 /* Lidora Chef */,
 				6DA82D6B2500971F00EF8261 /* Products */,
+				51AAECB4C07CFCAD6ED4D4DD /* Pods */,
+				33A38152DC0E72F95862C5AD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,9 +99,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6DA82D7E2500972300EF8261 /* Build configuration list for PBXNativeTarget "Lidora Chef" */;
 			buildPhases = (
+				21182C1D08D822CB261A512B /* [CP] Check Pods Manifest.lock */,
 				6DA82D662500971F00EF8261 /* Sources */,
 				6DA82D672500971F00EF8261 /* Frameworks */,
 				6DA82D682500971F00EF8261 /* Resources */,
+				2BC91CD76C180DC639CF3335 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -131,6 +158,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		21182C1D08D822CB261A512B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Lidora Chef-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2BC91CD76C180DC639CF3335 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Lidora Chef/Pods-Lidora Chef-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Lidora Chef/Pods-Lidora Chef-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Lidora Chef/Pods-Lidora Chef-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6DA82D662500971F00EF8261 /* Sources */ = {
@@ -283,6 +352,7 @@
 		};
 		6DA82D7F2500972300EF8261 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5722DC01A7DED56263B5B22A /* Pods-Lidora Chef.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -302,6 +372,7 @@
 		};
 		6DA82D802500972300EF8261 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6D2D6672D8280A87DC569E98 /* Pods-Lidora Chef.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -64,5 +64,7 @@
 	</array>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow location to use the app.</string>
 </dict>
 </plist>

@@ -11,6 +11,8 @@ import SweetCurtain
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var locationService = LocationService()
+
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -18,24 +20,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         setupRootViewController()
+        locationService.requestLocation()
         guard let _ = (scene as? UIWindowScene) else { return }
     }
     
     private func setupRootViewController() {
         
-        let navigationController = UINavigationController(rootViewController:  MainViewController())
+        let mainViewController = MainViewController()
+        locationService.locationView = mainViewController.locationView
+        
+        let navigationController = UINavigationController(rootViewController:  mainViewController)
         let cardViewController = CardViewController()
                 
         let curtainController = CurtainController(content: navigationController, curtain: cardViewController)
                 
-        curtainController.curtain.maxHeightCoefficient = 1.0
+        curtainController.curtain.maxHeightCoefficient = 0.95
         curtainController.curtain.midHeightCoefficient = 0.3
         curtainController.curtain.minHeightCoefficient = 0.1
+
         
         curtainController.curtain.showsHandleIndicator = false
         curtainController.curtain.bottomBounce = false
         curtainController.curtain.topBounce = false
-//        curtainController.curtainDelegate = entriesViewController
+        curtainController.curtainDelegate = cardViewController
         curtainController.modalPresentationStyle = .fullScreen
 
         self.window?.rootViewController = curtainController
