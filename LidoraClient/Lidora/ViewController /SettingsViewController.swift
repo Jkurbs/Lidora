@@ -50,8 +50,9 @@ class SettingsViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.separatorStyle = .none
+//        tableView.separatorStyle = .none
         tableView.backgroundColor = .systemBackground
+        tableView.tableFooterView = UIView()
         self.view.addSubview(tableView)
     }
     
@@ -112,7 +113,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         let row = indexPath.row
         if row == 0 {
-          let paymentViewController = PaymentViewController()
+          let paymentViewController = PaymentListViewController()
           navigationController?.pushViewController(paymentViewController, animated: true)
         } else if row == 1 {
            

@@ -20,6 +20,7 @@ class PaymentViewController: UIViewController {
     let card2ImageView = UIImageView()
     let card3ImageView = UIImageView()
     let card4ImageView = UIImageView()
+    let securityLabel = UILabel()
     
     lazy var nameField: FormTextField = {
         let textField = FormTextField()
@@ -116,10 +117,10 @@ class PaymentViewController: UIViewController {
         view.backgroundColor = .white
         
         descriptionLabel.text = "Credit or Debit card"
-        card1ImageView.image = UIImage(named: "stp_card_visa")
-        card2ImageView.image = UIImage(named: "stp_card_mastercard")
-        card3ImageView.image = UIImage(named: "stp_card_amex")
-        card4ImageView.image = UIImage(named: "stp_card_discover")
+        card1ImageView.image = UIImage(named: "visa")
+        card2ImageView.image = UIImage(named: "mastercard")
+        card3ImageView.image = UIImage(named: "amex")
+        card4ImageView.image = UIImage(named: "discover")
         
         card1ImageView.contentMode = .scaleAspectFit
         card2ImageView.contentMode = .scaleAspectFit
@@ -131,12 +132,18 @@ class PaymentViewController: UIViewController {
         detailsStackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(detailsStackView)
         
-        stackView = UIStackView(arrangedSubviews: [nameField, cardNumberField, cardExpirationDateField, cvcField])
+        securityLabel.text = "Your payment methods are saved and stored securely."
+        securityLabel.font = UIFont.systemFont(ofSize: 13)
+        securityLabel.textColor = .lightGray
+        securityLabel.textAlignment = .center
+        
+        stackView = UIStackView(arrangedSubviews: [nameField, cardNumberField, cardExpirationDateField, cvcField, securityLabel])
         stackView.axis = .vertical
         stackView.spacing = 10
         stackView.distribution = .fillEqually
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
+        
         
         NSLayoutConstraint.activate([
             
@@ -149,6 +156,7 @@ class PaymentViewController: UIViewController {
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -30),
             stackView.heightAnchor.constraint(equalToConstant: view.frame.height/2.8),
+            
         ])
     }
     
