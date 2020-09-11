@@ -31,6 +31,12 @@
 		6DB1E35C25088D380031B23D /* PaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB1E35B25088D380031B23D /* PaymentViewController.swift */; };
 		6DC0EE9725058AE0003440A8 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC0EE9625058AE0003440A8 /* MainViewController.swift */; };
 		6DC0EE9A25058C74003440A8 /* Chef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC0EE9925058C74003440A8 /* Chef.swift */; };
+		6DC57658250A963A0046A43D /* ChefSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC57657250A963A0046A43D /* ChefSection.swift */; };
+		6DC5765A250AC28E0046A43D /* ImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC57659250AC28E0046A43D /* ImageCell.swift */; };
+		6DD7B7F3250B29D10044A8DF /* InfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD7B7F2250B29D10044A8DF /* InfoCell.swift */; };
+		6DD7B7F5250B4D1D0044A8DF /* MenuSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD7B7F4250B4D1D0044A8DF /* MenuSection.swift */; };
+		6DD7B7F7250B4EBE0044A8DF /* EmbeddedCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD7B7F6250B4EBE0044A8DF /* EmbeddedCollectionViewCell.swift */; };
+		6DD7B7F9250BD0FE0044A8DF /* MenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD7B7F8250BD0FE0044A8DF /* MenuCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +66,12 @@
 		6DB1E35B25088D380031B23D /* PaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentViewController.swift; sourceTree = "<group>"; };
 		6DC0EE9625058AE0003440A8 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		6DC0EE9925058C74003440A8 /* Chef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chef.swift; sourceTree = "<group>"; };
+		6DC57657250A963A0046A43D /* ChefSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChefSection.swift; sourceTree = "<group>"; };
+		6DC57659250AC28E0046A43D /* ImageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCell.swift; sourceTree = "<group>"; };
+		6DD7B7F2250B29D10044A8DF /* InfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
+		6DD7B7F4250B4D1D0044A8DF /* MenuSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuSection.swift; sourceTree = "<group>"; };
+		6DD7B7F6250B4EBE0044A8DF /* EmbeddedCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedCollectionViewCell.swift; sourceTree = "<group>"; };
+		6DD7B7F8250BD0FE0044A8DF /* MenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuCell.swift; sourceTree = "<group>"; };
 		81A1E47AE9FA2C55C3CE715B /* Pods-Lidora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora.debug.xcconfig"; path = "Target Support Files/Pods-Lidora/Pods-Lidora.debug.xcconfig"; sourceTree = "<group>"; };
 		D505CB90AB7BBAB0241D080F /* Pods-Lidora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Lidora.release.xcconfig"; path = "Target Support Files/Pods-Lidora/Pods-Lidora.release.xcconfig"; sourceTree = "<group>"; };
 		E4F2BF5B6420209FE8CEB195 /* Pods_Lidora.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Lidora.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,6 +127,7 @@
 		6D572E8A24F677AB0077A7A0 /* Lidora */ = {
 			isa = PBXGroup;
 			children = (
+				6DC57656250A96290046A43D /* Section */,
 				6DB1E35825072D150031B23D /* Services */,
 				6DA4DA992505B0F00048A3CE /* Views */,
 				6DC0EE9825058C5F003440A8 /* Model */,
@@ -138,6 +151,10 @@
 				6DA4DA9A2505B11E0048A3CE /* LocationView.swift */,
 				6DA4DA9E2505CF1D0048A3CE /* ChefCell.swift */,
 				6DB1E35325071CD90031B23D /* EmptyView.swift */,
+				6DC57659250AC28E0046A43D /* ImageCell.swift */,
+				6DD7B7F2250B29D10044A8DF /* InfoCell.swift */,
+				6DD7B7F6250B4EBE0044A8DF /* EmbeddedCollectionViewCell.swift */,
+				6DD7B7F8250BD0FE0044A8DF /* MenuCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -155,9 +172,9 @@
 			isa = PBXGroup;
 			children = (
 				6DC0EE9625058AE0003440A8 /* MainViewController.swift */,
+				6D2FCFC52506050A00ABFBC1 /* MenuViewController.swift */,
 				6DA4DA972505943B0048A3CE /* CardViewController.swift */,
 				6DA4DA9C2505C31F0048A3CE /* LocationViewController.swift */,
-				6D2FCFC52506050A00ABFBC1 /* MenuViewController.swift */,
 				6DB1E3512506F9720031B23D /* SettingsViewController.swift */,
 				6DB1E359250873B90031B23D /* OrdersViewController.swift */,
 				6DB1E35B25088D380031B23D /* PaymentViewController.swift */,
@@ -174,6 +191,15 @@
 				6D87A83A25099873008C2DC2 /* User.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		6DC57656250A96290046A43D /* Section */ = {
+			isa = PBXGroup;
+			children = (
+				6DC57657250A963A0046A43D /* ChefSection.swift */,
+				6DD7B7F4250B4D1D0044A8DF /* MenuSection.swift */,
+			);
+			path = Section;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -291,25 +317,31 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DD7B7F7250B4EBE0044A8DF /* EmbeddedCollectionViewCell.swift in Sources */,
 				6DB1E35425071CD90031B23D /* EmptyView.swift in Sources */,
 				6D2FCFC62506050A00ABFBC1 /* MenuViewController.swift in Sources */,
 				6DB1E35C25088D380031B23D /* PaymentViewController.swift in Sources */,
 				6DB1E3502506E0510031B23D /* ChefSectionController.swift in Sources */,
 				6D572E8C24F677AB0077A7A0 /* AppDelegate.swift in Sources */,
+				6DC5765A250AC28E0046A43D /* ImageCell.swift in Sources */,
 				6DA4DA982505943B0048A3CE /* CardViewController.swift in Sources */,
 				6D87A83925099710008C2DC2 /* Card.swift in Sources */,
 				6D572E8E24F677AB0077A7A0 /* SceneDelegate.swift in Sources */,
 				6DA91B7D2509596F002B70A0 /* DataService.swift in Sources */,
 				6DA4DA9B2505B11E0048A3CE /* LocationView.swift in Sources */,
+				6DD7B7F5250B4D1D0044A8DF /* MenuSection.swift in Sources */,
 				6DA4DA9F2505CF1D0048A3CE /* ChefCell.swift in Sources */,
 				6DC0EE9A25058C74003440A8 /* Chef.swift in Sources */,
 				6DB1E35A250873B90031B23D /* OrdersViewController.swift in Sources */,
 				6DB1E35725072D0E0031B23D /* LocationManager.swift in Sources */,
 				6D87A83B25099873008C2DC2 /* User.swift in Sources */,
+				6DC57658250A963A0046A43D /* ChefSection.swift in Sources */,
 				6D87A83D25099B83008C2DC2 /* PaymentListViewController.swift in Sources */,
 				6DC0EE9725058AE0003440A8 /* MainViewController.swift in Sources */,
+				6DD7B7F9250BD0FE0044A8DF /* MenuCell.swift in Sources */,
 				6DA4DA9D2505C31F0048A3CE /* LocationViewController.swift in Sources */,
 				6DB1E3522506F9720031B23D /* SettingsViewController.swift in Sources */,
+				6DD7B7F3250B29D10044A8DF /* InfoCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

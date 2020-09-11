@@ -16,6 +16,17 @@ class PaymentListViewController: UIViewController {
     var tableView: UITableView!
     var cards = [Card]()
     
+    lazy var indicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView()
+        indicator.layer.position.y = 100
+        indicator.layer.position.x = view.layer.position.x
+        indicator.style = .medium
+        indicator.backgroundColor = .red
+        indicator.startAnimating()
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     // MARK: - View Lifecycle
     
     override func viewDidLoad() {
@@ -39,6 +50,7 @@ class PaymentListViewController: UIViewController {
         tableView.delegate = self
         tableView.backgroundColor = .systemBackground
         tableView.tableFooterView = UIView()
+        tableView.addSubview(indicator)
         self.view.addSubview(tableView)
     }
     
@@ -62,6 +74,7 @@ class PaymentListViewController: UIViewController {
                 self.cards.append(card!)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
+                    self.indicator.stopAnimating()
                 }
             }
         }
@@ -98,18 +111,39 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
         case .discovery:
             cell.imageView?.image = UIImage(named: card.brand.rawValue)
         }
-        
         cell.textLabel?.text = "**\(card.last4)"
-        cell.detailTextLabel?.text = "Primary"
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let card = self.cards[indexPath.row]
+        showAlert(index: indexPath.row,card: card)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         60.0
+    }
+
+    func showAlert(index: Int, card: Card) {
+        let alert = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
+        let remove = UIAlertAction(title: "Remove", style: .destructive) { (action) in
+            // Remove
+            self.cards.remove(at: index)
+            DataService.shared.removePaymentMethod(id: card.id) { (success, error) in
+                if !success {
+                    print("Error deleting payment method: ", error!)
+                } else {
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            }
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alert.addAction(remove)
+        alert.addAction(cancel)
+        self.present(alert, animated: true, completion: nil)
     }
 }
 

@@ -358,6 +358,9 @@ PODS:
   - nanopb/encode (1.30906.0)
   - PromisesObjC (1.2.10)
   - Protobuf (3.13.0)
+  - SDWebImage (5.9.0):
+    - SDWebImage/Core (= 5.9.0)
+  - SDWebImage/Core (5.9.0)
   - Stripe (19.4.0)
   - SweetCurtain (0.1.3)
 
@@ -370,6 +373,7 @@ DEPENDENCIES:
   - FormTextField
   - IGListKit (~> 4.0.0)
   - IQKeyboardManagerSwift
+  - SDWebImage (~> 5.0)
   - Stripe
   - SweetCurtain
 
@@ -401,6 +405,7 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - Protobuf
+    - SDWebImage
     - Stripe
     - SweetCurtain
 
@@ -431,9 +436,10 @@ SPEC CHECKSUMS:
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
   PromisesObjC: b14b1c6b68e306650688599de8a45e49fae81151
   Protobuf: 3dac39b34a08151c6d949560efe3f86134a3f748
+  SDWebImage: 62ae4a18473520c67b79e9724c31a63599cc9423
   Stripe: 92f1c73a9dbd3c54277ed06a1fea6e08f20414c6
   SweetCurtain: 348e8c8429495bb51a016cc4b1dba08abb3aa353
 
-PODFILE CHECKSUM: 1345aa45441626707e049c1b230e55dff5f59f79
+PODFILE CHECKSUM: ce6605dee48b9b1e58c186af1f52680515f06964
 
 COCOAPODS: 1.9.3

@@ -126,7 +126,7 @@ class ChefCell: UICollectionViewCell {
     
     var chef: Chef? {
         didSet {
-            
+            print("CHEF SETUP")
         }
     }
 }
