@@ -6,46 +6,68 @@
 //
 
 import UIKit
+import FirebaseAuth
 import SweetCurtain
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var handle: AuthStateDidChangeListenerHandle?
     var locationService = LocationService()
-
-
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        setupRootViewController()
+        observeAuthorisedState()
         locationService.requestLocation()
         guard let _ = (scene as? UIWindowScene) else { return }
     }
     
-    private func setupRootViewController() {
-        
-        let mainViewController = MainViewController()
-        locationService.locationView = mainViewController.locationView
-        
-        let navigationController = UINavigationController(rootViewController:  mainViewController)
-        let cardViewController = CardViewController()
-                
-        let curtainController = CurtainController(content: navigationController, curtain: cardViewController)
-                
-        curtainController.curtain.maxHeightCoefficient = 0.95
-        curtainController.curtain.midHeightCoefficient = 0.3
-        curtainController.curtain.minHeightCoefficient = 0.1
+    
+    func observeAuthorisedState() {
+        handle = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
+            guard let self = self else { return }
+            if user == nil {
+                self.setupRootViewController(viewController: AuthViewController())
+            } else {
+                // Fetch user
+                guard let user = user else { return }
+                DataService.shared.fetchUser(userId: user.uid) { (user, error) in
+                    if let error = error {
+                        print("Error: ", error)
+                    } else {
+                        let mainViewController = MainViewController()
+                        mainViewController.user = user
+                        self.locationService.locationView = mainViewController.locationView
+                        let navigationController = UINavigationController(rootViewController:  mainViewController)
+                        let cardViewController = CardViewController()
+                        cardViewController.user = user
+                                
+                        let curtainController = CurtainController(content: navigationController, curtain: cardViewController)
+                                
+                        curtainController.curtain.maxHeightCoefficient = 0.95
+                        curtainController.curtain.midHeightCoefficient = 0.5
+                        curtainController.curtain.minHeightCoefficient = 0.12
 
-        
-        curtainController.curtain.showsHandleIndicator = false
-        curtainController.curtain.bottomBounce = false
-        curtainController.curtain.topBounce = false
-        curtainController.curtainDelegate = cardViewController
-        curtainController.modalPresentationStyle = .fullScreen
-
-        self.window?.rootViewController = curtainController
+                        curtainController.curtain.showsHandleIndicator = true
+                        curtainController.curtain.bottomBounce = false
+                        curtainController.curtain.topBounce = false
+                        curtainController.curtainDelegate = cardViewController
+                        curtainController.modalPresentationStyle = .fullScreen
+                        
+                        self.window?.rootViewController = curtainController
+                        self.window?.makeKeyAndVisible()
+                    }
+                }
+            }
+            Auth.auth().removeStateDidChangeListener(self.handle!)
+        }
+    }
+    
+    private func setupRootViewController(viewController: UIViewController) {
+        let navigationController = UINavigationController(rootViewController: viewController)
+        self.window?.rootViewController = viewController
         self.window?.makeKeyAndVisible()
     }
 

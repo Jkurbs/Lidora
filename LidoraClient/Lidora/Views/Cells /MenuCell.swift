@@ -34,14 +34,13 @@ class MenuCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
         imageView.layer.cornerRadius = 10
     }
     
     func setupViews() {
         
         addSubview(imageView)
-        imageView.backgroundColor = .red
+        imageView.backgroundColor = .lightGray
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -51,12 +50,12 @@ class MenuCell: UICollectionViewCell {
         
         addSubview(priceLabel)
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
+        priceLabel.font = UIFont.systemFont(ofSize: 15)
         
         addSubview(descriptionLabel)
         descriptionLabel.textColor = .lightGray
         descriptionLabel.font = UIFont.systemFont(ofSize: 14)
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        
         
         NSLayoutConstraint.activate([
             

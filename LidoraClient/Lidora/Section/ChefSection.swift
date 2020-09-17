@@ -8,32 +8,23 @@
 import UIKit
 import IGListKit
 
-class ChefSection: ListSectionController, ListAdapterDataSource {
+class ChefSection: ListSectionController {
 
     private var chef: Chef? {
         didSet {
             guard let menu = chef?.menu else { return }
-            print("Menu: ", menu.description)
             menus.append(menu)
-            adapter.performUpdates(animated: true)
         }
     }
     
     var menus = [Menu]()
-    
-    lazy var adapter: ListAdapter = {
-        let adapter = ListAdapter(updater: ListAdapterUpdater(),
-                                  viewController: self.viewController)
-        adapter.dataSource = self
-        return adapter
-    }()
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
         if index == 0 {
             return CGSize(width: width, height: 200)
         } else if index == 1 {
-            return CGSize(width: width, height: 80)
+            return CGSize(width: width, height: 100)
         } else  {
             return CGSize(width: width, height: 50)
         }
@@ -41,7 +32,7 @@ class ChefSection: ListSectionController, ListAdapterDataSource {
     
     override init() {
         super.init()
-        self.inset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+//        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
     }
     
     override func numberOfItems() -> Int {
@@ -57,32 +48,21 @@ class ChefSection: ListSectionController, ListAdapterDataSource {
             guard let titleCell = collectionContext?.dequeueReusableCell(of: TitleCell.self, for: self, at: index) as? TitleCell else { fatalError() }
             titleCell.chef = chef
             return titleCell
-        } else if index == 2 {
+        } else {
             guard let infoCell = collectionContext?.dequeueReusableCell(of: InfoCell.self, for: self, at: index) as? InfoCell else { fatalError() }
             return infoCell
-        } else {
-            guard let cell = collectionContext?.dequeueReusableCell(of: EmbeddedCollectionViewCell.self, for: self, at: index) as? EmbeddedCollectionViewCell else { fatalError() }
-            adapter.collectionView = cell.collectionView
-            return cell
         }
     }
     
     override func didUpdate(to object: Any) {
         self.chef = object as? Chef
     }
-}
-
-extension ChefSection {
     
-    func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-        return menus as [ListDiffable]
-    }
-    
-    func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        return MenuSection()
-    }
-    
-    func emptyView(for listAdapter: ListAdapter) -> UIView? {
-        return nil
+    override func didSelectItem(at index: Int) {
+        if index == 2 {
+            self.viewController?.curtainController?.moveCurtain(to: .hide, animated: false)
+            let scheduleViewController = ScheduleViewController()
+            self.viewController?.navigationController?.pushViewController(scheduleViewController, animated: true)
+        }
     }
 }

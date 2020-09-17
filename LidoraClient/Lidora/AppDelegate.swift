@@ -8,6 +8,7 @@
 import UIKit
 import Stripe
 import Firebase
+import FirebaseMessaging
 import UserNotifications
 import IQKeyboardManagerSwift
 
@@ -37,15 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             guard error == nil else {
                 print(error!.localizedDescription)
                 return
-            }
-        }
-        
-        //get application instance ID
-        InstanceID.instanceID().instanceID { (result, error) in
-            if let error = error {
-                print("Error fetching remote instance ID: \(error)")
-            } else if let result = result {
-                print("Remote instance ID token: \(result.token)")
             }
         }
         

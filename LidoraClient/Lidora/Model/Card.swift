@@ -27,21 +27,22 @@ enum CardBrand: String, CaseIterable {
     }
 }
 
-
-
 class Card {
     
-    let id: String
-    let brand: CardBrand
-    let last4: String
-    let month: Int
-    let year: Int
+    var id: String!
+    var brand: CardBrand!
+    var last4: String!
+    var month: Int!
+    var year: Int!
     
     init(id: String, data: [String: Any]) {
         self.id = id
-        self.brand = CardBrand(rawValue:  (data["brand"] as? String)!)!
-        self.last4 = data["last4"] as! String
-        self.month = data["month"] as! Int
-        self.year = data["year"] as! Int
+        
+        guard let brandData = data["brand"] as? String,  let brand = CardBrand(rawValue: brandData ), let last4 = data["last4"] as? String, let month = data["month"] as? Int, let year = data["year"] as? Int   else { return }
+        
+        self.brand = brand
+        self.last4 = last4
+        self.month = month
+        self.year = year
     }
 }

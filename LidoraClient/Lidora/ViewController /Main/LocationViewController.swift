@@ -15,6 +15,8 @@ class LocationViewController: UIViewController {
     var searchBar = UISearchBar()
     var searchCompleter = MKLocalSearchCompleter()
     var searchResults = [MKLocalSearchCompletion]()
+    var currentAddress: String?
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,22 +38,22 @@ class LocationViewController: UIViewController {
         
         searchCompleter.delegate = self
 
+        searchBar.frame = CGRect(x: 0, y: 60, width: view.frame.width, height: 60)
         searchBar.searchBarStyle = .prominent
         searchBar.placeholder = " Search your address"
         searchBar.sizeToFit()
         searchBar.isTranslucent = false
         searchBar.backgroundImage = UIImage()
         searchBar.delegate = self
+        view.addSubview(searchBar)
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "cancel-24"), style: .done, target: self, action: #selector(cancel))
         navigationController?.navigationBar.tintColor = .darkText
         
-        tableView = UITableView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height), style: .plain)
+        tableView = UITableView(frame: CGRect(x: 0, y: 120, width: view.frame.width, height: view.frame.height - 60), style: .plain)
         tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.addSubview(searchBar)
-        
         view.addSubview(tableView)
     }
     
@@ -91,25 +93,36 @@ extension LocationViewController: MKLocalSearchCompleterDelegate {
 extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchResults.count
+        if section == 0 {
+            return 1
+        } else {
+            return searchResults.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-        let searchResult = searchResults[indexPath.row]
         let originalImage = UIImage(systemName: "location")
         let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-
         cell.imageView?.image = image
-        cell.textLabel?.text = searchResult.title
+        if indexPath.section == 0 {
+            cell.textLabel?.text = self.currentAddress
+        } else {
+            let searchResult = searchResults[indexPath.row]
+            cell.textLabel?.text = searchResult.title
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.section == 0 {
+            return 60.0
+        }
         return 60.0
     }
     
@@ -117,6 +130,4 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
         let selectedResult = self.searchResults[indexPath.row]
         navigationItem.rightBarButtonItem?.isEnabled = true
     }
-    
-    
 }

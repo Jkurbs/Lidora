@@ -31,13 +31,15 @@ class MenuViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.navigationBar.tintColor = .white
+        navigationController?.hidesBarsOnSwipe = true
         navigationController?.navigationBar.prefersLargeTitles = false
-        
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = UIColor.clear
-        
+        self.curtainController?.moveCurtain(to: .min, animated: false)
+
         fetchMenu()
     }
     
@@ -46,7 +48,7 @@ class MenuViewController: UIViewController {
         view.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
         view.addSubview(collectionView)
         collectionView.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
-        collectionView.frame = view.frame
+        collectionView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (self.curtainController?.curtain.actualHeight)!)
         adapter.collectionView = collectionView
         adapter.dataSource = self
     }
@@ -57,7 +59,6 @@ class MenuViewController: UIViewController {
                 print("Error: ", error)
             } else {
                 self.menus.append(menu!)
-                print("MENU:: ", self.menus.count)
                 self.adapter.performUpdates(animated: true, completion: nil)
             }
         }
@@ -85,11 +86,29 @@ extension MenuViewController: ListAdapterDataSource {
                 return CGSize(width: context.containerSize.width, height: 90)
             }
             let sectionController = ListSingleSectionController(cellClass: MenuCell.self, configureBlock: configureBlock, sizeBlock: sizeBlock)
+            sectionController.inset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+            sectionController.selectionDelegate = self
             return sectionController
         }
     }
     
     func emptyView(for listAdapter: ListAdapter) -> UIView? {
         return nil
+    }
+}
+    
+extension MenuViewController: ListSingleSectionControllerDelegate {
+    // MARK: - ListSingleSectionControllerDelegate
+
+    func didSelect(_ sectionController: ListSingleSectionController, with object: Any) {
+        if let menu = object as? Menu {
+            self.curtainController?.moveCurtain(to: .mid, animated: true)
+            NotificationCenter.default.post(name: NSNotification.Name("menu"), object: self, userInfo: ["menu": menu])
+            if let cardViewController = curtainController?.curtainViewController as? CardViewController {
+                cardViewController.chef = self.chef.first
+                cardViewController.overView.chef = self.chef.first
+                cardViewController.cardState = .overview
+            }
+        }
     }
 }

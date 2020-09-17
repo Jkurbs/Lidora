@@ -65,20 +65,18 @@ class SettingsViewController: UIViewController {
      func logoutAlert() {
       let alert = UIAlertController(title: "Log Out", message: nil, preferredStyle: .alert)
       let logOut = UIAlertAction(title: "Log Out", style: .default) { _ in
+          
           let firebaseAuth = Auth.auth()
-        
-//          UserDefaults.standard.removeObject(forKey: .userId)
-//
-//          do {
-//              try firebaseAuth.signOut()
-//
-//              let navigation = UINavigationController(rootViewController: AuthVC())
-//
-//              navigation.modalPresentationStyle = .fullScreen
-//              self.navigationController?.present(navigation, animated: true, completion: nil)
-//          } catch let error as NSError {
-//              NSLog("Error signing out: \(error)")
-//          }
+          UserDefaults.standard.removeObject(forKey: .userId)
+
+          do {
+              try firebaseAuth.signOut()
+              let navigation = UINavigationController(rootViewController: AuthViewController())
+              navigation.modalPresentationStyle = .fullScreen
+              self.navigationController?.present(navigation, animated: true, completion: nil)
+          } catch let error as NSError {
+              NSLog("Error signing out: \(error)")
+          }
       }
       let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
       alert.addAction(logOut)
@@ -116,7 +114,8 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
           let paymentViewController = PaymentListViewController()
           navigationController?.pushViewController(paymentViewController, animated: true)
         } else if row == 1 {
-           
+            let paymentViewController = ChangePasswordViewController()
+            navigationController?.pushViewController(paymentViewController, animated: true)
         } else {
             logoutAlert()
         }

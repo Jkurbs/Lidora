@@ -25,7 +25,7 @@ class ChefCell: UICollectionViewCell {
     
     private func setupViews() {
         
-        backgroundColor = .systemBackground
+        backgroundColor = .white
         self.layer.cornerRadius = 10.0
         self.layer.borderWidth = 1.0
         self.layer.borderColor = UIColor(white: 0.9, alpha: 1.0).cgColor
@@ -41,6 +41,7 @@ class ChefCell: UICollectionViewCell {
         nameLabel.text = "With Paola"
         nameLabel.font = UIFont.systemFont(ofSize: 22)
         nameLabel.textAlignment = .center
+        nameLabel.textColor = .darkText
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         let imageView1 = UIImageView(image: UIImage(named:  "food1"))
@@ -70,7 +71,7 @@ class ChefCell: UICollectionViewCell {
         textView.sizeToFit()
         textView.translatesAutoresizingMaskIntoConstraints = false
         
-        deliveryFeeLabel.text = "30 - 40 min"
+        deliveryFeeLabel.text = "1 day pre-order"
         deliveryFeeLabel.font = UIFont.systemFont(ofSize: 13)
         deliveryTimeLabel.text = "$2.99 Delivery Fee"
         deliveryTimeLabel.font = UIFont.systemFont(ofSize: 13)

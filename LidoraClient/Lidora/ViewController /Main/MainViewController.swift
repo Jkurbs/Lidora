@@ -27,6 +27,7 @@ class MainViewController: UIViewController {
     }()
     
     var chefs = [Chef]()
+    var user: User? 
     
     enum Section: Int, Hashable, CaseIterable, CustomStringConvertible {
         case chefs
@@ -44,13 +45,14 @@ class MainViewController: UIViewController {
         setupViews()
         configureHierarchy()
         configureDataSource()
+        fetchChefs()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.navigationBar.tintColor = .darkText
         navigationController?.navigationBar.prefersLargeTitles = true
         self.curtainController?.moveCurtain(to: .min, animated: false)
-        fetchChefs()
     }
     
     
@@ -71,14 +73,12 @@ class MainViewController: UIViewController {
     
     
     func setupViews() {
-        
-        self.title = "Near you"
-        view.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
+        view.backgroundColor = UIColor.tertiarySystemGroupedBackground
         let menuBarButton = UIBarButtonItem(image: UIImage(named: "setting-24"), style: .done, target: self, action: #selector(goToSettings))
         let orderButton = UIBarButtonItem(image: UIImage(named: "order-25"), style: .done, target: self, action: #selector(goToOrders))
         navigationController?.navigationBar.tintColor = .darkText
         navigationItem.rightBarButtonItems = [menuBarButton, orderButton]
-        locationView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(goToLocationVC)))
+        locationView.label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(goToLocationVC)))
     }
     
     @objc func goToOrders() {
@@ -94,26 +94,31 @@ class MainViewController: UIViewController {
     }
     
     @objc func goToLocationVC() {
-        let navigationController = UINavigationController(rootViewController: LocationViewController())
+        let locationViewController = LocationViewController()
+        locationViewController.currentAddress = locationView.label.text
+        let navigationController = UINavigationController(rootViewController: locationViewController)
         self.present(navigationController, animated: true, completion: nil)
     }
     
     func configureHierarchy() {
                 
         collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), collectionViewLayout: createLayout())
+        collectionView.collectionViewLayout = createLayout()
         collectionView.delegate = self 
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
+        collectionView.backgroundColor = UIColor.tertiarySystemGroupedBackground
+        
+        //(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
         collectionView.register(ChefCell.self, forCellWithReuseIdentifier: "ChefCell")
         collectionView.addSubview(indicator)
         view.addSubview(collectionView)
         view.addSubview(locationView)
         
         NSLayoutConstraint.activate([
-            locationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            locationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -40),
             locationView.widthAnchor.constraint(equalTo: view.widthAnchor),
-            locationView.heightAnchor.constraint(equalToConstant: 30),
-            collectionView.topAnchor.constraint(equalTo: locationView.bottomAnchor, constant: 20),
+            locationView.heightAnchor.constraint(equalToConstant: 90),
+            collectionView.topAnchor.constraint(equalTo: locationView.bottomAnchor, constant: 30),
             collectionView.widthAnchor.constraint(equalTo: view.widthAnchor),
             collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, constant: 0)
         ])

@@ -2,7 +2,7 @@
 //  EmbeddedCollectionViewCell.swift
 //  Lidora
 //
-//  Created by Kerby Jean on 9/11/20.
+//  Created by Kerby Jean on 9/14/20.
 //
 
 import UIKit

@@ -51,12 +51,15 @@ class InfoCell: UICollectionViewCell {
     func setupViews() {
         addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         label.text = "Schedule"
         
         addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(systemName: "chevron.right")
+        
+        let originalImage = UIImage(systemName: "chevron.right")
+        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        imageView.image = image
         imageView.contentMode = .scaleAspectFit
         
         contentView.layer.addSublayer(separator)

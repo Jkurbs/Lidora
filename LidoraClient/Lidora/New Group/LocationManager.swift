@@ -71,7 +71,11 @@ extension LocationService: CLLocationManagerDelegate {
             geocoder.reverseGeocodeLocation(lastLocation,  completionHandler: {
                 (placemarks, error) in
                     if error == nil {
-                        if let firstLocation = placemarks?[0], let address = firstLocation.name {
+                        if let firstLocation = placemarks?[0], let address = firstLocation.name, let postalCode = firstLocation.postalCode, let state = firstLocation.administrativeArea, let city = firstLocation.locality {
+                            
+                            print("ADDRESS: \(address) \(postalCode) \(state) \(city)")
+                            
+//                            DataService.shared.updateUserLocation(line1: address, postalCode: <#T##String#>, state: <#T##String#>)
                             self.locationView?.updateViews(address)
                         }
                     }

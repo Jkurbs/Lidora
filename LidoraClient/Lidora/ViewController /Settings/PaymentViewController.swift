@@ -21,6 +21,7 @@ class PaymentViewController: UIViewController {
     let card3ImageView = UIImageView()
     let card4ImageView = UIImageView()
     let securityLabel = UILabel()
+    var button: LoadingButton!
     
     lazy var nameField: FormTextField = {
         let textField = FormTextField()
@@ -28,7 +29,7 @@ class PaymentViewController: UIViewController {
         textField.accessoryViewMode = .never
         textField.placeholder = "Name on card"
         textField.borderStyle = .roundedRect
-        textField.inputAccessoryView = payView
+        textField.inputAccessoryView = buttonView
         return textField
     }()
     
@@ -39,7 +40,7 @@ class PaymentViewController: UIViewController {
         textField.formatter = CardNumberFormatter()
         textField.placeholder = "Card Number"
         textField.borderStyle = .roundedRect
-        textField.inputAccessoryView = payView
+        textField.inputAccessoryView = buttonView
         var validation = Validation()
         validation.maximumLength = "1234 5678 1234 5678".count
         validation.minimumLength = "1234 5678 1234 5678".count
@@ -58,7 +59,7 @@ class PaymentViewController: UIViewController {
         textField.formatter = CardExpirationDateFormatter()
         textField.placeholder = "MM/YY"
         textField.borderStyle = .roundedRect
-        textField.inputAccessoryView = payView
+        textField.inputAccessoryView = buttonView
         var validation = Validation()
         validation.minimumLength = 1
         let inputValidator = CardExpirationDateInputValidator(validation: validation)
@@ -72,7 +73,7 @@ class PaymentViewController: UIViewController {
         textField.accessoryViewMode = .never
         textField.placeholder = "CVC"
         textField.borderStyle = .roundedRect
-        textField.inputAccessoryView = payView
+        textField.inputAccessoryView = buttonView
         var validation = Validation()
         validation.maximumLength = "CVC".count
         validation.minimumLength = "CVC".count
@@ -82,19 +83,21 @@ class PaymentViewController: UIViewController {
         return textField
     }()
     
-    lazy var payView: UIView = {
+    lazy var buttonView: UIView = {
         let view = UIView()
         view.frame =  CGRect(x: 0, y: 0, width: view.frame.size.width, height: 60)
         view.backgroundColor = .white
         view.layer.shadowColor = UIColor.darkGray.cgColor
         view.layer.shadowRadius = 5.0
-        let button = UIButton(type: .custom)
+        let button = LoadingButton(type: .custom)
+        self.button = button
+        button.enable()
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 5.0
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
         button.setTitle("Save", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(pay), for: .touchUpInside)
+        button.addTarget(self, action: #selector(addPaymentMethod), for: .touchUpInside)
         view.addSubview(button)
         
         NSLayoutConstraint.activate([
@@ -106,9 +109,17 @@ class PaymentViewController: UIViewController {
         return view
     }()
     
+    
+    var card: Card?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateViews()
     }
     
     
@@ -155,19 +166,28 @@ class PaymentViewController: UIViewController {
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -30),
             stackView.heightAnchor.constraint(equalToConstant: view.frame.height/2.8),
-            
         ])
+    }
+    
+    func updateViews() {
+        if card != nil {
+            // Update
+        } else {
+            // Do nothing
+        }
     }
     
     
     
-    @objc func pay() {
+    @objc func addPaymentMethod(_ button: UIButton) {
         
         guard cardNumberField.validate(), cardExpirationDateField.validate(), cvcField.validate() else { return }
         
         let cardParams = STPCardParams()
         cardParams.number = cardNumberField.text
         
+        self.button.showLoading()
+
         if let expirationText = cardExpirationDateField.text {
             let monthStartIndex = expirationText.index(expirationText.startIndex, offsetBy: 0)
             let monthEndIndex = expirationText.index(monthStartIndex, offsetBy: 2)
@@ -181,11 +201,21 @@ class PaymentViewController: UIViewController {
             DataService.shared.getStripeToken(cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
                 if !success {
                     print("Error: ", error!)
+                    self.button.hideLoading()
                 } else {
-                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.button.hideLoading()
+                        self.view.showMessage("Card successfully added", type: .success)
+                    }
                 }
             }
         }
+    }
+    
+    func disable() {
+        navigationItem.backBarButtonItem?.isEnabled = false
+        buttonView.isUserInteractionEnabled = false 
+        
     }
 }
 

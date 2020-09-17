@@ -16,16 +16,18 @@ class PaymentListViewController: UIViewController {
     var tableView: UITableView!
     var cards = [Card]()
     
+    var emptyView = EmptyView()
+
     lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
         indicator.layer.position.y = 100
         indicator.layer.position.x = view.layer.position.x
         indicator.style = .medium
         indicator.backgroundColor = .red
-        indicator.startAnimating()
         indicator.hidesWhenStopped = true
         return indicator
     }()
+
     
     // MARK: - View Lifecycle
     
@@ -44,6 +46,7 @@ class PaymentListViewController: UIViewController {
         let displayWidth: CGFloat = self.view.frame.width
         let displayHeight: CGFloat = self.view.frame.height
         
+        
         tableView = UITableView(frame: CGRect(x: 0, y: 0, width: displayWidth, height: displayHeight))
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.dataSource = self
@@ -51,7 +54,16 @@ class PaymentListViewController: UIViewController {
         tableView.backgroundColor = .systemBackground
         tableView.tableFooterView = UIView()
         tableView.addSubview(indicator)
-        self.view.addSubview(tableView)
+        view.addSubview(tableView)
+        
+        emptyView.updateView(imageName: "creditcard", title: "You haven't added no payments methods.")
+        view.addSubview(emptyView)
+        
+        NSLayoutConstraint.activate([
+            emptyView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            emptyView.heightAnchor.constraint(equalTo: view.heightAnchor)
+        ])
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -71,6 +83,7 @@ class PaymentListViewController: UIViewController {
             if let error = error {
                 print("Error getting payment methods: ", error)
             } else {
+                self.indicator.startAnimating()
                 self.cards.append(card!)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -92,7 +105,11 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        cards.count
+        if cards.count == 0 {
+            self.emptyView.isHidden = false
+        }
+        self.emptyView.isHidden = true
+        return cards.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -110,8 +127,10 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
             cell.imageView?.image = UIImage(named: card.brand.rawValue)
         case .discovery:
             cell.imageView?.image = UIImage(named: card.brand.rawValue)
+        case .none:
+            break
         }
-        cell.textLabel?.text = "**\(card.last4)"
+        cell.textLabel?.text = "\(card.brand.rawValue.capitalized) *\(card.last4 ?? "****")"
         return cell
     }
     
@@ -127,6 +146,12 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
 
     func showAlert(index: Int, card: Card) {
         let alert = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
+        let editCard = UIAlertAction(title: "Edit Card", style: .default) { (action) in
+//            let paymentViewController = PaymentViewController()
+//            navigationController?.pushViewController(paymentViewController, animated: true)
+        }
+        
+        
         let remove = UIAlertAction(title: "Remove", style: .destructive) { (action) in
             // Remove
             self.cards.remove(at: index)
@@ -141,6 +166,7 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
             }
         }
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alert.addAction(editCard)
         alert.addAction(remove)
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)

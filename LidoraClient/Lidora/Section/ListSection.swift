@@ -1,24 +1,21 @@
 //
-//  MenuSection.swift
+//  ListSection.swift
 //  Lidora
 //
-//  Created by Kerby Jean on 9/11/20.
+//  Created by Kerby Jean on 9/14/20.
 //
 
 import UIKit
 import IGListKit
 
-class MenuSection: ListSectionController {
+class ListSection: ListSectionController {
 
-    private var menu: Menu?
+    private var order: Order?
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
-        let height =  collectionContext!.containerSize.height
-        return CGSize(width: width, height: height)
-        
+        return CGSize(width: width, height: 60.0)
     }
-    
     
     override init() {
         super.init()
@@ -30,11 +27,12 @@ class MenuSection: ListSectionController {
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
-        guard let imageCell = collectionContext?.dequeueReusableCell(of: ImageCell.self, for: self, at: index) as? ImageCell else { fatalError() }
-        return imageCell
+        guard let cell = collectionContext?.dequeueReusableCell(of: OrderCell.self, for: self, at: index) as? OrderCell else { fatalError() }
+//        cell.order = order
+        return cell
     }
     
     override func didUpdate(to object: Any) {
-        self.menu = object as? Menu
+        self.order = object as? Order
     }
 }

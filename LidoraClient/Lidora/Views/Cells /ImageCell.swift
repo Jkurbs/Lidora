@@ -31,8 +31,14 @@ class ImageCell: UICollectionViewCell {
         super.layoutSubviews()
         NSLayoutConstraint.activate([
         
-            imageView.heightAnchor.constraint(equalTo: heightAnchor, constant: -20),
-            imageView.widthAnchor.constraint(equalTo: widthAnchor)
+            imageView.topAnchor.constraint(equalTo: topAnchor, constant: -100),
+            imageView.leftAnchor.constraint(equalTo: leftAnchor),
+            imageView.rightAnchor.constraint(equalTo: rightAnchor),
+            imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+//            imageView.heightAnchor.constraint(equalTo: heightAnchor),
+//            imageView.widthAnchor.constraint(equalTo: widthAnchor),
+            
         ])
     }
     
@@ -74,9 +80,8 @@ class TitleCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: topAnchor, constant: 16.0),
             label.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
-            label.topAnchor.constraint(equalTo: topAnchor),
-        
             descriptionLabel.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 6.0),
             descriptionLabel.leftAnchor.constraint(equalTo: label.leftAnchor)
         ])
