@@ -10,79 +10,43 @@ import IGListKit
 
 class CardSection: ListSectionController {
     
-    private var order: Order?
-    var orders = [Menu]()
-    
-    lazy var adapter: ListAdapter = {
-        let adapter = ListAdapter(updater: ListAdapterUpdater(),
-                                  viewController: self.viewController)
-        adapter.dataSource = self
-        return adapter
-    }()
+    private var card: Card?
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
         if index == 0 {
-            return CGSize(width: width, height: 40)
+            return CGSize(width: width, height: 30)
         } else {
-            return CGSize(width: width, height: 400)
+            return CGSize(width: width, height: 60)
         }
     }
     
     override init() {
         super.init()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(addToBag(_:)), name: NSNotification.Name("order"), object: nil)
-    }
-    
-    @objc func addToBag(_ notification: Notification) {        
-        
-        
-        
-        
-        
-//        if let userInfo = notification.userInfo {
-//            if let order = userInfo["menu"] as? Menu {
-////                self.orders.append(order)
-//                self.adapter.performUpdates(animated: true)
-//            }
-//        }
+        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+
     }
     
     override func numberOfItems() -> Int {
-        1
+        2
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
         if index == 0 {
-            guard let cell = collectionContext?.dequeueReusableCell(of: InfoCell.self, for: self, at: index) as? InfoCell else { fatalError() }
-            cell.label.text = "14212 NE 3RD CT"
-            return cell
+            guard let cell = collectionContext?.dequeueReusableCell(of: HeaderCell.self, for: self, at: index) as? HeaderCell else { fatalError() }
+            cell.title = "Payment method"
+            return cell 
         } else {
-            guard let cell = collectionContext?.dequeueReusableCell(of: EmbeddedCollectionViewCell.self, for: self, at: index) as? EmbeddedCollectionViewCell else { fatalError() }
-            cell.collectionView.backgroundColor = .red
-            adapter.collectionView = cell.collectionView
+            guard let cell = collectionContext?.dequeueReusableCell(of: PrimaryCardCell.self, for: self, at: index) as? PrimaryCardCell else { fatalError() }
+            cell.label.text = "*\(card!.last4!)"
+            guard let brand = card?.brand else { return UICollectionViewCell() }
+            cell.imageView.image = UIImage(named: brand.rawValue)
             return cell
         }
     }
     
     override func didUpdate(to object: Any) {
-        self.order = object as? Order
+        self.card = object as? Card
     }
 }
 
-
-extension CardSection: ListAdapterDataSource {
-    
-    func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-        return orders as [ListDiffable]
-    }
-    
-    func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        return ListSection()
-    }
-    
-    func emptyView(for listAdapter: ListAdapter) -> UIView? {
-        return nil
-    }
-}

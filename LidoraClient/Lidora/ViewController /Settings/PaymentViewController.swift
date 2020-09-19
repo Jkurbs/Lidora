@@ -22,6 +22,7 @@ class PaymentViewController: UIViewController {
     let card4ImageView = UIImageView()
     let securityLabel = UILabel()
     var button: LoadingButton!
+    var primaryCardId: String? 
     
     lazy var nameField: FormTextField = {
         let textField = FormTextField()
@@ -198,7 +199,7 @@ class PaymentViewController: UIViewController {
             let expYear = (expirationText[yearStartIndex..<yearEndIndex])
             let year = UInt(expYear)!
         
-            DataService.shared.getStripeToken(cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
+            DataService.shared.createStripePaymentMethod(primaryCard: self.primaryCardId ?? "" ,cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
                 if !success {
                     print("Error: ", error!)
                     self.button.hideLoading()

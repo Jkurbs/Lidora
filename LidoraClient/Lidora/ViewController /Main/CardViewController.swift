@@ -21,10 +21,12 @@ class CardViewController: UIViewController {
     let titleView = TitleView() 
     let emptyView = EmptyView()
     let overView = OverView() 
-    var proceedButton = UIButton()
+    var proceedButton = LoadingButton()
     var user: User?
     var chef: Chef?
+    var order = [Order]()
     var menus = [Menu]()
+    var card = [Card]()
     
     var cardState = CardState.empty {
         didSet {
@@ -70,6 +72,7 @@ class CardViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchBag()
+        fetchPrimaryCard()
     }
     
     override func viewDidLoad() {
@@ -101,11 +104,12 @@ class CardViewController: UIViewController {
         adapter.dataSource = self
         
         view.addSubview(proceedButton)
+        proceedButton.enable()
         proceedButton.translatesAutoresizingMaskIntoConstraints = false
-        proceedButton.setTitle("Pre-Order", for: .normal)
+        proceedButton.setTitle("Place Order", for: .normal)
         proceedButton.backgroundColor = .systemBlue
         proceedButton.addTarget(self, action: #selector(placeOrder), for: .touchUpInside)
-
+    
         NSLayoutConstraint.activate([
             emptyView.widthAnchor.constraint(equalTo: view.widthAnchor),
             emptyView.heightAnchor.constraint(equalTo: view.heightAnchor),
@@ -116,20 +120,21 @@ class CardViewController: UIViewController {
             proceedButton.heightAnchor.constraint(equalToConstant: 60.0),
             proceedButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(addToBag(_:)), name: .addToBag, object: nil)
     }
     
     // MARK: - Functions
     
     func fetchBag() {
-        guard let bagId = user?.bagId else { return }
-        DataService.shared.fetchBag(bagId: bagId) { (success, bag, menu, error) in
+        guard let orderId = user?.orderId else { return }
+        DataService.shared.fetchCurrentOrder(orderId: orderId) { (success, order, menu, error) in
             if !success! {
                 self.cardState = .none
             } else {
                 self.cardState = .notEmpty
-                self.titleView.cardButton.setTitle("View Bag - \(bag!.quantity!)", for: .normal)
+                self.titleView.cardButton.setTitle("View Bag - \(order!.quantity!)", for: .normal)
+                self.order.append(order!)
                 self.menus.append(menu!)
                 self.adapter.performUpdates(animated: true)
                 self.adapter.reloadObjects(self.menus)
@@ -137,16 +142,30 @@ class CardViewController: UIViewController {
         }
     }
     
+    func fetchPrimaryCard() {
+        guard let primaryCardId = user?.primaryCard else { return }
+        DataService.shared.getPrimaryPaymentMethod(cardId: primaryCardId) { (card, error) in
+            if let error = error {
+                print("Error getting payment methods: ", error)
+            } else {
+                self.card.append(card!)
+                DispatchQueue.main.async {
+                    self.adapter.performUpdates(animated: true)
+                }
+            }
+        }
+    }
+    
     @objc func addToBag(_ notification: Notification) {
-        print("ADD TO BAG")
+        guard let chef = chef else { return }
         self.curtainController?.moveCurtain(to: .min, animated: true)
-        guard let bagId = user?.bagId else { return }
+        guard let bagId = user?.orderId else { return }
         if let userInfo = notification.userInfo {
             if let item = userInfo["item"] as? Menu,
                let quantity = userInfo["quantity"] as? Int,
                let total = userInfo["total"] as? Double {
                 self.cardState = .notEmpty
-                DataService.shared.addItemToBag(bagId: bagId, item: item, quantity: quantity, total: total) { (success, error) in
+                DataService.shared.addItemToBag(bagId: bagId, chef: chef, item: item, quantity: quantity, total: total) { (success, error) in
                     if !success! {
                         print("Error adding to bag: ", error!)
                     } else {
@@ -163,15 +182,18 @@ class CardViewController: UIViewController {
     }
     
     @objc func placeOrder() {
-        guard let chef = chef else { return }
-//        DataService.shared.placeOrder(chef: chef, orders: self.orders) { (success, error) in
-//            if let error = error {
-//                print("Error: ", error)
-//            } else {
-//                self.view.showMessage("Order placed", type: .success)
-//                self.cardState = .empty
-//            }
-//        }
+        fetchBag()
+        self.proceedButton.showLoading()
+        guard let chef = chef, let order = self.order.first, let card = self.card.first else { return }
+        DataService.shared.placeOrder(chef: chef, order: order, card: card) { (success, error) in
+            if let _ = error {
+                self.proceedButton.hideLoading()
+            } else {
+                self.view.showMessage("Order placed", type: .success)
+                self.cardState = .empty
+                self.proceedButton.hideLoading()
+            }
+        }
     }
 }
 
@@ -181,8 +203,8 @@ extension CardViewController: CurtainDelegate {
     func curtain(_ curtain: Curtain, didChange heightState: CurtainHeightState) {
         switch heightState {
         case .min:
-            view.backgroundColor = UIColor(white: 0.6, alpha: 1.0)
-            titleView.backgroundColor = UIColor(white: 0.6, alpha: 1.0)
+            view.backgroundColor = UIColor(white: 0.7, alpha: 1.0)
+            titleView.backgroundColor = UIColor(white: 0.7, alpha: 1.0)
             collectionView.isHidden = true
             if cardState != .notEmpty {
                 cardState = .none
@@ -219,27 +241,19 @@ extension CardViewController: CurtainDelegate {
 extension CardViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-//        var data = ["1"] as [ListDiffable]
-//        data += menus as [ListDiffable]
-        return menus as [ListDiffable]
+        var data = ["1"] as [ListDiffable]
+        data += menus as [ListDiffable]
+        data += card as [ListDiffable]
+        return data
     }
     
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        if object is Int {
-            return CardSection()
+        if object is String {
+            return OrderInfoSection() 
+        } else if object is Menu {
+            return OrderSection()
         } else {
-            let configureBlock = { (item: Any, cell: UICollectionViewCell) in
-                guard let cell = cell as? OrderCell, let menu = item as? Menu else { return }
-                cell.menu = menu
-            }
-            let sizeBlock = { (item: Any, context: ListCollectionContext?) -> CGSize in
-                guard let context = context else { return .zero }
-                return CGSize(width: context.containerSize.width, height: 45)
-            }
-            let sectionController = ListSingleSectionController(cellClass: OrderCell.self, configureBlock: configureBlock, sizeBlock: sizeBlock)
-            sectionController.inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-//            sectionController.selectionDelegate = self
-            return sectionController
+            return CardSection()
         }
     }
     

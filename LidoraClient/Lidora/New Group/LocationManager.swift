@@ -73,9 +73,7 @@ extension LocationService: CLLocationManagerDelegate {
                     if error == nil {
                         if let firstLocation = placemarks?[0], let address = firstLocation.name, let postalCode = firstLocation.postalCode, let state = firstLocation.administrativeArea, let city = firstLocation.locality {
                             
-                            print("ADDRESS: \(address) \(postalCode) \(state) \(city)")
-                            
-//                            DataService.shared.updateUserLocation(line1: address, postalCode: <#T##String#>, state: <#T##String#>)
+                            //DataService.shared.updateUserLocation(line1: address, postalCode: postalCode, state: state)
                             self.locationView?.updateViews(address)
                         }
                     }

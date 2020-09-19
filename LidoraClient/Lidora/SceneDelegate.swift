@@ -50,6 +50,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         curtainController.curtain.midHeightCoefficient = 0.5
                         curtainController.curtain.minHeightCoefficient = 0.12
 
+                        curtainController.curtain.handleIndicatorColor = .lightText
                         curtainController.curtain.showsHandleIndicator = true
                         curtainController.curtain.bottomBounce = false
                         curtainController.curtain.topBounce = false

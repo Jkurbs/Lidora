@@ -15,7 +15,7 @@ class EmptyView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        backgroundColor = UIColor(white: 0.9, alpha: 1.0)
+        backgroundColor = UIColor.white
         translatesAutoresizingMaskIntoConstraints = false
 
         imageView.contentMode = .scaleAspectFit

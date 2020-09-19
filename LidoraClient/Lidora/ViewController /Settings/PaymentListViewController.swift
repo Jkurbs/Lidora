@@ -74,17 +74,23 @@ class PaymentListViewController: UIViewController {
     // MARK: - Functions
     
     @objc func goToAddNewPaymentVC() {
-        navigationController?.pushViewController(PaymentViewController(), animated: true)
+        
+        let vc = PaymentViewController()
+        if let primaryCardId = self.cards.filter({$0.primary == true}).first?.id {
+            vc.primaryCardId = primaryCardId
+        }
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     func loadCards() {
+        self.indicator.startAnimating()
         self.cards.removeAll()
         DataService.shared.getPaymentMethods { (card, error) in
             if let error = error {
                 print("Error getting payment methods: ", error)
             } else {
-                self.indicator.startAnimating()
-                self.cards.append(card!)
+                self.emptyView.isHidden = true
+                self.cards.insert(card!, at: 0)
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.indicator.stopAnimating()
@@ -105,32 +111,21 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if cards.count == 0 {
-            self.emptyView.isHidden = false
-        }
-        self.emptyView.isHidden = true
         return cards.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        
         let card = self.cards[indexPath.row]
         cell.backgroundColor = .systemBackground
         cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        
-        switch card.brand {
-        case .visa:
-            cell.imageView?.image = UIImage(named: card.brand.rawValue)
-        case .mastercard:
-            cell.imageView?.image = UIImage(named: card.brand.rawValue)
-        case .amex:
-            cell.imageView?.image = UIImage(named: card.brand.rawValue)
-        case .discovery:
-            cell.imageView?.image = UIImage(named: card.brand.rawValue)
-        case .none:
-            break
-        }
-        cell.textLabel?.text = "\(card.brand.rawValue.capitalized) *\(card.last4 ?? "****")"
+         
+        guard let brand = card.brand else { return UITableViewCell() }
+
+        cell.imageView?.image = UIImage(named: brand.rawValue)
+        cell.textLabel?.text = "\(brand.rawValue.capitalized) *\(card.last4 ?? "****")"
+        cell.detailTextLabel?.text = card.primary! ? "Primary" : ""
         return cell
     }
     
@@ -147,8 +142,8 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     func showAlert(index: Int, card: Card) {
         let alert = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
         let editCard = UIAlertAction(title: "Edit Card", style: .default) { (action) in
-//            let paymentViewController = PaymentViewController()
-//            navigationController?.pushViewController(paymentViewController, animated: true)
+           // let paymentViewController = PaymentViewController()
+           // navigationController?.pushViewController(paymentViewController, animated: true)
         }
         
         
