@@ -8,7 +8,6 @@
 import UIKit
 import CoreLocation
 
-
 class MainViewController: UIViewController {
     
     var locationView = LocationView()
@@ -54,7 +53,6 @@ class MainViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         self.curtainController?.moveCurtain(to: .min, animated: false)
     }
-    
     
     func fetchChefs() {
         self.chefs.removeAll()
@@ -172,7 +170,6 @@ class MainViewController: UIViewController {
     
     
     func applyInitialSnapshots() {
-        
         // Set the order for our sections
         let sections = Section.allCases
         var snapshot = NSDiffableDataSourceSnapshot<Section, Chef>()

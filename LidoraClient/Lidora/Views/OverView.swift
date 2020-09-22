@@ -34,7 +34,7 @@ class OverView: UIView {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
         button.setTitle("Add to bag", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(addToBag), for: .touchUpInside)
+        button.addTarget(self, action: #selector(addToOrder), for: .touchUpInside)
         addSubview(button)
         return button
     }()
@@ -121,7 +121,7 @@ class OverView: UIView {
         button.setTitle("Add \(Int(stepper.value)) to bag - $\(finalPrice)", for: .normal)
     }
     
-    @objc func addToBag() {
+    @objc func addToOrder() {
         guard let item = self.menu else { return  }
         let quantity = Int(self.stepper.value)
         let total = (menu?.price)! * Double(quantity)

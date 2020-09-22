@@ -10,25 +10,39 @@ import Stripe
 import FirebaseAuth
 import FirebaseFirestore
 
+
+
 class DataService {
     
     static let shared = DataService()
     
     // MARK: - Firebase Refs
     
-    var RefCustomers: CollectionReference {
-        return Firestore.firestore().collection("customers")
-    }
-    
     var RefChefs: CollectionReference {
         return Firestore.firestore().collection("chefs")
     }
     
+    var CurrentUserId: String? {
+        return Auth.auth().currentUser?.uid
+    }
     
-    // User
+    var RefCurrentUser: DocumentReference {
+        return Firestore.firestore().collection("customers").document(CurrentUserId ?? "")
+    }
     
+    var RefPaymentsMethods: CollectionReference {
+        return RefCurrentUser.collection("payment_methods")
+    }
+    
+    var RefOrders: CollectionReference {
+        return RefCurrentUser.collection("orders")
+    }
+
+    // MARK: - Functions
+    
+    // SAVE USER DETAILS
     func saveUserDetails(userId: String, data: [String: Any], complete: @escaping (Bool, Error?) -> Void) {
-        self.RefCustomers.document(userId).setData(data, merge: true) { (error) in
+        self.RefCurrentUser.setData(data, merge: true) { (error) in
             if let error = error {
                 print("Error saving user details: ", error)
                 complete(false, error)
@@ -38,32 +52,31 @@ class DataService {
         }
     }
     
+    // UPDATE USER LOCATION
     func updateUserLocation(line1: String, postalCode: String, state: String) {
         
     }
     
+    // FETCH CURRENT USER
     func fetchUser(userId: String, complete: @escaping (User?, Error?) -> Void) {
-        self.RefCustomers.document(userId).getDocument { (snapshot, error) in
+        self.RefCurrentUser.getDocument { (snapshot, error) in
             if let error = error {
                 print("Error fetch user details: ", error)
                 complete(nil, error)
             } else {
-                guard let snapshot = snapshot else { return }
+                guard let snapshot = snapshot, let data = snapshot.data() else { return }
                 let id = snapshot.documentID
-                let data = snapshot.data()
-                let user = User(id: id, data: data!)
+                let user = User(id: id, data: data)
                 complete(user, nil)
             }
         }
     }
     
     
-    // Payments
-    
+    // CREATE STRIPE PAYMENT METHOD
     func createStripePaymentMethod(primaryCard: String, cardNumber: String, month: UInt, year: UInt, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
         
         let cardParams = STPCardParams()
-        cardParams.name = "Kerby Jean"
         cardParams.number = cardNumber
         cardParams.expMonth =  month
         cardParams.expYear = year
@@ -80,10 +93,6 @@ class DataService {
                     if let error = error {
                         complete(false, error)
                     } else {
-                        
-                        
-                        
-                        
                         complete(true, nil)
                     }
                 }
@@ -91,14 +100,14 @@ class DataService {
         }
     }
     
+    
+    // ADD PAYMENT METHOD
     func addPaymentMethod(primaryCard: String, tokenId: String, number: String, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        let ref = self.RefCustomers.document(currentUserUID).collection("payment_methods")
-        ref.document(tokenId).setData(["id": tokenId, "number": number, "cvc": cvc], merge: true) { (error) in
+        RefPaymentsMethods.document(tokenId).setData(["id": tokenId, "number": number, "cvc": cvc], merge: true) { (error) in
             if let error = error {
                 complete(false, error)
             } else {
-                ref.document(primaryCard).updateData(["primary": false]) { (error) in
+                self.RefPaymentsMethods.document(primaryCard).updateData(["primary": false]) { (error) in
                     if let error = error {
                         complete(false, error)
                     } else {
@@ -109,9 +118,10 @@ class DataService {
         }
     }
     
-    func getPrimaryPaymentMethod(cardId: String, complete: @escaping (Card?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        self.RefCustomers.document(currentUserUID).collection("payment_methods").document(cardId).getDocument(completion: { (snapshot, error) in
+    
+    // FETCH PRIMARY PAYMENT METHOD
+    func fetchPrimaryPaymentMethod(cardId: String, complete: @escaping (Card?, Error?) -> Void) {
+        RefPaymentsMethods.document(cardId).getDocument(completion: { (snapshot, error) in
             if let error = error {
                 complete(nil, error)
             } else {
@@ -125,9 +135,17 @@ class DataService {
         })
     }
     
-    func getPaymentMethods(complete: @escaping (Card?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        self.RefCustomers.document(currentUserUID).collection("payment_methods").getDocuments { (snapshot, error) in
+    
+    // SET PRIMARY PAYMENT METHOD
+    func setPrimaryPaymentMethod(oldCardId: String, cardId: String) {
+        RefPaymentsMethods.document(oldCardId).updateData(["primary": false])
+        RefPaymentsMethods.document(cardId).setData(["primary": true], merge: true)
+    }
+    
+    
+    // FETCH PAYMENT METHODS
+    func fetchPaymentMethods(complete: @escaping (Card?, Error?) -> Void) {
+        RefPaymentsMethods.getDocuments { (snapshot, error) in
             if let error = error {
                 complete(nil, error)
             } else {
@@ -143,9 +161,10 @@ class DataService {
         }
     }
     
+    
+    // REMOVE PAYMENT METHOD
     func removePaymentMethod(id: String, complete: @escaping (Bool, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        self.RefCustomers.document(currentUserUID).collection("payment_methods").document(id).delete { (error) in
+        RefPaymentsMethods.document(id).delete { (error) in
             if let error = error {
                 complete(false, error)
             } else {
@@ -155,12 +174,7 @@ class DataService {
     }
     
     
-    func addStripeToken() {
-        
-    }
-    
-    
-    // Chefs
+    // FETCH CHEFS
     func fetchChefs(id: String, complete: @escaping (Chef?, Error?) -> Void) {
         self.RefChefs.getDocuments(completion: { (snapshot, error) in
             if let error = error {
@@ -177,6 +191,7 @@ class DataService {
         })
     }
     
+    // FETCH SELECTED CHEF MENU
     func fetchMenu(id: String, complete: @escaping (Menu?, Error?) -> Void) {
         self.RefChefs.document(id).collection("menu").getDocuments { (snapshot, error) in
             if let error = error {
@@ -193,11 +208,10 @@ class DataService {
         }
     }
     
-    
-    func addItemToBag(bagId: String, chef: Chef, item: Menu, quantity: Int, total: Double, complete: @escaping (Bool?, Error?) -> Void) {
-        
-        guard let currentUserUID = Auth.auth().currentUser?.uid, let providerId = chef.id, let name = item.name, let description = item.description, let imageURL = item.imageURL else { return }
-        let ref = self.RefCustomers.document(currentUserUID).collection("orders").document(bagId)
+    // ADD ITEM TO ORDER
+    func addItemToOrder(orderId: String, chef: Chef, item: Menu, quantity: Int, total: Double, complete: @escaping (Bool?, Error?) -> Void) {
+        guard let providerId = chef.id, let name = item.name, let description = item.description, let imageURL = item.imageURL else { return }
+        let ref = self.RefCurrentUser.collection("orders").document(orderId)
         let itemRef = ref.collection("items").document(item.id)
         Firestore.firestore().runTransaction({ (transaction, errorPointer) -> Any? in
             let document: DocumentSnapshot
@@ -210,23 +224,40 @@ class DataService {
                 complete(false, fetchError)
                 return nil
             }
-            
+
             if document.exists {
                 guard let totalPrice = document.data()?["total"] as? Double, let totalQuantity = document.data()?["quantity"] as? Int else {
                     return nil
                 }
-                transaction.updateData(["total": (total + totalPrice), "quantity":  quantity + totalQuantity], forDocument: ref)
+                let service = (total + totalPrice).serviceFee()
+                let subtotal = service.subtotal
+                let platformFee = service.platformFee
+                let stripeFee = service.stripeFee
+                let serviceFee = service.serviceFee
+                let total = service.total
+
+                transaction.updateData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity + totalQuantity], forDocument: ref)
             } else {
-                transaction.setData(["total": total, "quantity": quantity], forDocument: ref)
+                let service = total.serviceFee()
+                let subtotal = service.subtotal
+                let platformFee = service.platformFee
+                let stripeFee = service.stripeFee
+                let serviceFee = service.serviceFee
+                let total = service.total
+                
+                transaction.setData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity, "provider_id": chef.id!, "provider_name": chef.firstName!], forDocument: ref)
             }
             
             if itemDocument.exists {
                 guard let totalPrice = itemDocument.data()?["total"] as? Double, let totalQuantity = itemDocument.data()?["quantity"] as? Int else {
                     return nil
                 }
-                transaction.updateData(["total": (total + totalPrice), "quantity":  quantity + totalQuantity], forDocument: itemRef)
+                
+                let roundedTotal = roundNumber(total + totalPrice)
+                transaction.updateData(["total": roundedTotal, "quantity":  quantity + totalQuantity], forDocument: itemRef)
             } else {
-                transaction.setData(["destination": providerId, "name": name, "description": description, "total": total, "quantity": quantity, "imageURL": imageURL], forDocument: itemRef)
+                let roundedTotal = roundNumber(total)
+                transaction.setData(["destination": providerId, "name": name, "description": description, "total": roundedTotal, "quantity": quantity, "imageURL": imageURL], forDocument: itemRef)
             }
             return nil
         }) { (object, error) in
@@ -237,10 +268,10 @@ class DataService {
             }
         }
     }
-    
+
+    // FETCH USER CURRENT ORDER
     func fetchCurrentOrder(orderId: String, complete: @escaping (Bool?, Order?, Menu?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        let ref = self.RefCustomers.document(currentUserUID).collection("orders").document(orderId)
+        let ref = RefOrders.document(orderId)
         ref.getDocument { (snapshot, error) in
             if let error = error {
                 complete(false, nil, nil, error)
@@ -267,16 +298,17 @@ class DataService {
         }
     }
 
-    
-    func placeOrder(chef: Chef, order: Order, card: Card, complete: @escaping (Bool?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid, let orderId = order.id else { return }
-        let ref = self.RefCustomers.document(currentUserUID).collection("orders").document(orderId)
+    // PLACE ORDER
+    func placeOrder(order: Order, card: Card, complete: @escaping (Bool?, Error?) -> Void) {
+        guard let orderId = order.id else { return }
+        let ref = self.RefOrders.document(orderId)
         ref.getDocument { (snapshot, error) in
             guard let snapshot = snapshot, let bagData = snapshot.data() else { return }
-            let amount = bagData["total"] as! Double
-            self.completeCharge(destination: chef.id!, amount: amount, card: card) { (success, id, error) in
+            let subtotal = bagData["subtotal"] as! Double
+            let total = bagData["total"] as! Double
+            self.completeCharge(destination: order.providerId, destinationName: order.providerName, subtotal: subtotal, total: total, card: card) { (success, id, error) in
                 if let error = error {
-                    print("Error: ", error)
+                    complete(false, error)
                 } else {
                     complete(true, nil)
                 }
@@ -284,9 +316,9 @@ class DataService {
         }
     }
     
-    // Create stripe Payment token
-    func completeCharge(destination: String, amount: Double, card: Card?, complete: @escaping (Bool, String?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid, let number = card?.cardNumber, let month = card?.month, let year = card?.year, let cvv = card?.cvv else { return }
+    // COMPLETE ORDER CHARGE
+    func completeCharge(destination: String, destinationName: String, subtotal: Double, total: Double, card: Card?, complete: @escaping (Bool, String?, Error?) -> Void) {
+        guard let number = card?.cardNumber, let month = card?.month, let year = card?.year, let cvv = card?.cvv else { return }
         
         let cardParams = STPCardParams()
         cardParams.number =  number
@@ -299,7 +331,7 @@ class DataService {
                 complete(false, nil, error)
                 return
             }
-            self.RefCustomers.document(currentUserUID).collection("payments").document(token.tokenId).setData(["amount": amount, "currency" : "usd", "payment_method": token.tokenId, "destination": destination], merge: true) { (error) in
+            self.RefPaymentsMethods.document(token.tokenId).setData(["subtotal": subtotal, "total": total, "currency" : "usd", "payment_method": token.tokenId, "destination": destination, "provider_name": destinationName], merge: true) { (error) in
                 if let error = error {
                     complete(false, nil, error)
                 } else {
@@ -309,9 +341,10 @@ class DataService {
         }
     }
     
-    func fetchOrders(complete: @escaping (Order?, Error?) -> Void) {
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        self.RefCustomers.document(currentUserUID).collection("orders").getDocuments { (snapshot, error) in
+    
+    // FETCH UPCOMING ORDERS
+    func fetchUpcomingOrders(complete: @escaping (Order?, Error?) -> Void) {
+        self.RefCurrentUser.collection("upcoming_orders").getDocuments { (snapshot, error) in
             if let error = error {
                 complete(nil, error)
             } else {

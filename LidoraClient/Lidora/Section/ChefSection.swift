@@ -29,12 +29,7 @@ class ChefSection: ListSectionController {
             return CGSize(width: width, height: 50)
         }
     }
-    
-    override init() {
-        super.init()
-//        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
-    }
-    
+
     override func numberOfItems() -> Int {
         3
     }

@@ -16,7 +16,6 @@ class MenuSection: ListSectionController {
         let width = collectionContext!.containerSize.width
         let height =  collectionContext!.containerSize.height
         return CGSize(width: width, height: height)
-        
     }
     
     

@@ -45,12 +45,12 @@ class OrdersViewController: UIViewController, ListAdapterDataSource {
     }
     
     func fetchOrders() {
-        DataService.shared.fetchOrders { (order, error) in
+        DataService.shared.fetchUpcomingOrders { (order, error) in
             if let error = error {
                 print("Error: ", error)
             } else {
                 self.orders.append(order!)
-                self.adapter.performUpdates(animated: true)
+//                self.adapter.performUpdates(animated: true)
             }
         }
     }

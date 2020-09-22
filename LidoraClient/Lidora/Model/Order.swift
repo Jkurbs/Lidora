@@ -12,24 +12,36 @@ class Order {
     
     var id: String!
     var providerId: String!
+    var providerName: String!
     var items: [Menu]?
     var quantity: Int!
-    var price: Double!
+    var subtotal: Double!
+    var platformFee: Double!
+    var stripeFee: Double!
+    var serviceFee: Double!
+    var total: Double!
     
-    init(key: String, providerId: String, items: [Menu]?, quantity: Int, price: Double) {
+    init(key: String, providerId: String, providerName: String, items: [Menu]?, quantity: Int, total: Double) {
         self.id = key
         self.providerId = providerId
+        self.providerName = providerName
         self.items = items
         self.quantity = quantity
-        self.price = price
+        self.total = total
     }
     
     init(key: String, data: [String: Any]) {
         self.id = key
         self.providerId = data["provider_id"] as? String
+        self.providerName = data["provider_name"] as? String
         self.items = data["menu"] as? [Menu]
         self.quantity = data["quantity"] as? Int
-        self.price = data["price"] as? Double
+        self.subtotal = data["subtotal"] as? Double
+        self.platformFee = data["platform_fee"] as? Double
+        self.stripeFee = data["stripe_fee"] as? Double
+        self.serviceFee = data["service_fee"] as? Double
+        self.total = data["total"] as? Double
+        
     }
 }
 

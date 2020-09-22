@@ -19,6 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
+        print("SCENE")
         observeAuthorisedState()
         locationService.requestLocation()
         guard let _ = (scene as? UIWindowScene) else { return }
@@ -42,6 +43,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         self.locationService.locationView = mainViewController.locationView
                         let navigationController = UINavigationController(rootViewController:  mainViewController)
                         let cardViewController = CardViewController()
+                        let cardNavigationController = UINavigationController(rootViewController:  cardViewController)
+
                         cardViewController.user = user
                                 
                         let curtainController = CurtainController(content: navigationController, curtain: cardViewController)
@@ -67,7 +70,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func setupRootViewController(viewController: UIViewController) {
-        let navigationController = UINavigationController(rootViewController: viewController)
         self.window?.rootViewController = viewController
         self.window?.makeKeyAndVisible()
     }

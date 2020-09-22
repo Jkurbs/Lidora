@@ -14,10 +14,10 @@ class CardSection: ListSectionController {
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
-        if index == 0 {
-            return CGSize(width: width, height: 30)
-        } else {
+        if index == 1 {
             return CGSize(width: width, height: 60)
+        } else {
+            return CGSize(width: width, height: 30)
         }
     }
     
@@ -47,6 +47,56 @@ class CardSection: ListSectionController {
     
     override func didUpdate(to object: Any) {
         self.card = object as? Card
+    }
+    
+    override func didSelectItem(at index: Int) {
+        if index == 1 {
+            let paymentListViewController = PaymentListViewController()
+            paymentListViewController.currentCard = card
+            let navigationController = UINavigationController(rootViewController: paymentListViewController)
+            paymentListViewController.delegate = self.viewController as? CardViewController
+            self.viewController?.present(navigationController, animated: true, completion: nil)
+        }
+    }
+}
+
+
+// TotalSection
+class TotalSection: ListSectionController {
+    
+    private var order: Order?
+    
+    override func sizeForItem(at index: Int) -> CGSize {
+        let width = collectionContext!.containerSize.width
+        return CGSize(width: width, height: 45)
+    }
+    
+    override init() {
+        super.init()
+        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+    }
+    
+    override func numberOfItems() -> Int {
+        3
+    }
+    
+    override func cellForItem(at index: Int) -> UICollectionViewCell {
+        guard let cell = collectionContext?.dequeueReusableCell(of: TotalCell.self, for: self, at: index) as? TotalCell else {
+            fatalError() }
+        if index == 0 {
+            cell.updateViews(title: "Subtotal", value: order?.subtotal)
+        } else if index == 1 {
+            cell.updateViews(title: "Service Fee", value: order!.serviceFee)
+            cell.separator.isHidden = true
+        } else {
+            cell.label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
+            cell.updateViews(title: "Total", value: order?.total)
+        }
+        return cell
+    }
+    
+    override func didUpdate(to object: Any) {
+        self.order = object as? Order
     }
 }
 

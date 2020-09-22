@@ -96,9 +96,10 @@ extension MenuViewController: ListAdapterDataSource {
         return nil
     }
 }
+
+// MARK: - ListSingleSectionControllerDelegate
     
 extension MenuViewController: ListSingleSectionControllerDelegate {
-    // MARK: - ListSingleSectionControllerDelegate
 
     func didSelect(_ sectionController: ListSingleSectionController, with object: Any) {
         if let menu = object as? Menu {

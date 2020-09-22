@@ -17,7 +17,6 @@ class LocationViewController: UIViewController {
     var searchResults = [MKLocalSearchCompletion]()
     var currentAddress: String?
 
-
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
@@ -46,8 +45,7 @@ class LocationViewController: UIViewController {
         searchBar.backgroundImage = UIImage()
         searchBar.delegate = self
         view.addSubview(searchBar)
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "cancel-24"), style: .done, target: self, action: #selector(cancel))
+
         navigationController?.navigationBar.tintColor = .darkText
         
         tableView = UITableView(frame: CGRect(x: 0, y: 120, width: view.frame.width, height: view.frame.height - 60), style: .plain)
@@ -56,12 +54,6 @@ class LocationViewController: UIViewController {
         tableView.dataSource = self
         view.addSubview(tableView)
     }
-    
-
-    @objc func cancel() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
     
     @objc func done() {
         
@@ -106,7 +98,8 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
         let originalImage = UIImage(systemName: "location")
         let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
         cell.imageView?.image = image
@@ -115,6 +108,7 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             let searchResult = searchResults[indexPath.row]
             cell.textLabel?.text = searchResult.title
+            cell.detailTextLabel?.text = searchResult.subtitle
         }
         return cell
     }
@@ -127,7 +121,12 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedResult = self.searchResults[indexPath.row]
+        if indexPath.section == 0 {
+            
+        } else {
+            let selectedResult = self.searchResults[indexPath.row]
+            print("SELECTED RESULT: ", selectedResult.subtitle)
+        }
         navigationItem.rightBarButtonItem?.isEnabled = true
     }
 }

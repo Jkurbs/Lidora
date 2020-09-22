@@ -117,7 +117,7 @@ class PrimaryCardCell: UICollectionViewCell {
     func setupViews() {
         addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         label.text = "Schedule"
         
         addSubview(imageView)

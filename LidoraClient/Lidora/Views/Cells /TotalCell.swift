@@ -1,18 +1,16 @@
 //
-//  OrderCell.swift
+//  TotalCell.swift
 //  Lidora
 //
-//  Created by Kerby Jean on 9/13/20.
+//  Created by Kerby Jean on 9/19/20.
 //
 
 import UIKit
 
-class OrderCell: UICollectionViewCell {
+class TotalCell: UICollectionViewCell {
     
     var label = UILabel()
-    var quantityLabel = UILabel()
     var priceLabel = UILabel()
-    var descriptionLabel = UILabel()
     
     let separator: CALayer = {
         let layer = CALayer()
@@ -20,12 +18,11 @@ class OrderCell: UICollectionViewCell {
         return layer
     }()
     
-    var menu: Menu? {
+    var order: Order? {
         didSet {
-            guard let menu = menu else { return }
-            label.text = menu.name
-            quantityLabel.text = "\(menu.quantity ?? 0)"
-            priceLabel.text = "$\(menu.total ?? 0.0)"
+            guard let order = order else { return }
+            label.text = "Subtotal"
+            priceLabel.text = "$\(order.total ?? 0.0)"
         }
     }
     
@@ -41,9 +38,7 @@ class OrderCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         NSLayoutConstraint.activate([
-            quantityLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
-            quantityLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            label.leftAnchor.constraint(equalTo:  quantityLabel.rightAnchor, constant: 16.0),
+            label.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
             label.centerYAnchor.constraint(equalTo: centerYAnchor),
             priceLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -16.0),
             priceLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -52,23 +47,25 @@ class OrderCell: UICollectionViewCell {
     
     func setupViews() {
         
-        addSubview(quantityLabel)
-        quantityLabel.translatesAutoresizingMaskIntoConstraints = false
-        quantityLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-
         addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
         addSubview(priceLabel)
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.font = UIFont.systemFont(ofSize: 15, weight: .regular)
+        priceLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
 
         
         contentView.layer.addSublayer(separator)
         let height: CGFloat = 0.5
         separator.frame = CGRect(x: 16.0, y: bounds.height - height, width: bounds.width, height: height)
     }
+    
+    func updateViews(title: String, value: Double?) {
+        label.text = title
+        priceLabel.text = "$\(value ?? 0.0)"
+    }
 }
+
 
 

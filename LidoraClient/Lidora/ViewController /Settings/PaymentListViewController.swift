@@ -14,9 +14,13 @@ class PaymentListViewController: UIViewController {
     // MARK: - Properties
     
     var tableView: UITableView!
+    var currentCard: Card? 
     var cards = [Card]()
     
+    var delegate: CardDelegate?
     var emptyView = EmptyView()
+    
+    var selectedIndex: IndexPath?
 
     lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -30,6 +34,12 @@ class PaymentListViewController: UIViewController {
 
     
     // MARK: - View Lifecycle
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadCards()
+        updateViews()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,13 +56,13 @@ class PaymentListViewController: UIViewController {
         let displayWidth: CGFloat = self.view.frame.width
         let displayHeight: CGFloat = self.view.frame.height
         
-        
         tableView = UITableView(frame: CGRect(x: 0, y: 0, width: displayWidth, height: displayHeight))
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = .systemBackground
         tableView.tableFooterView = UIView()
+        tableView.allowsMultipleSelection = false
         tableView.addSubview(indicator)
         view.addSubview(tableView)
         
@@ -63,12 +73,17 @@ class PaymentListViewController: UIViewController {
             emptyView.widthAnchor.constraint(equalTo: view.widthAnchor),
             emptyView.heightAnchor.constraint(equalTo: view.heightAnchor)
         ])
-        
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        loadCards()
+    func updateViews() {
+        if let _ = currentCard {
+            self.navigationItem.rightBarButtonItem = nil
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(changePaymentMethod))
+        }
+    }
+    
+    @objc func changePaymentMethod() {
+        self.dismiss(animated: true, completion: nil)
     }
     
     // MARK: - Functions
@@ -78,6 +93,7 @@ class PaymentListViewController: UIViewController {
         let vc = PaymentViewController()
         if let primaryCardId = self.cards.filter({$0.primary == true}).first?.id {
             vc.primaryCardId = primaryCardId
+            self.navigationItem.rightBarButtonItem = nil
         }
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -85,7 +101,7 @@ class PaymentListViewController: UIViewController {
     func loadCards() {
         self.indicator.startAnimating()
         self.cards.removeAll()
-        DataService.shared.getPaymentMethods { (card, error) in
+        DataService.shared.fetchPaymentMethods { (card, error) in
             if let error = error {
                 print("Error getting payment methods: ", error)
             } else {
@@ -116,23 +132,41 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        
+        cell.selectionStyle = .none
+
         let card = self.cards[indexPath.row]
         cell.backgroundColor = .systemBackground
         cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-         
         guard let brand = card.brand else { return UITableViewCell() }
 
         cell.imageView?.image = UIImage(named: brand.rawValue)
         cell.textLabel?.text = "\(brand.rawValue.capitalized) *\(card.last4 ?? "****")"
         cell.detailTextLabel?.text = card.primary! ? "Primary" : ""
+
+        if let _ = currentCard {
+            if card.primary == true {
+                tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+                cell.accessoryType = .checkmark
+                self.selectedIndex = indexPath
+            }
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let cell = tableView.cellForRow(at: indexPath)
         let card = self.cards[indexPath.row]
-        showAlert(index: indexPath.row,card: card)
+        if let selectedIndex = selectedIndex {
+            let oldCard = self.cards[selectedIndex.row]
+            let selectedCell = tableView.cellForRow(at: selectedIndex)
+            selectedCell?.accessoryType = .none
+            cell?.accessoryType = .checkmark
+            DataService.shared.setPrimaryPaymentMethod(oldCardId: oldCard.id, cardId: card.id)
+            delegate?.switchCard(newCard: card)
+        } else {
+            showAlert(index: indexPath.row,card: card)
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

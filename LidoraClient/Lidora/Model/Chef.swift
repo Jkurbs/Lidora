@@ -47,6 +47,7 @@ class Menu {
     let name: String!
     let description: String?
     let price: Double!
+    let total: Double?
     let quantity: Int?
     
     init(key: String, data: [String: Any]) {
@@ -55,6 +56,7 @@ class Menu {
         self.name = data["name"] as? String
         self.description = data["description"] as? String
         self.price = data["price"] as? Double
+        self.total = data["total"] as? Double
         self.quantity = data["quantity"] as? Int
     }
 }
