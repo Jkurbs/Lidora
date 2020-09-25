@@ -39,7 +39,7 @@ class LocationViewController: UIViewController {
 
         searchBar.frame = CGRect(x: 0, y: 60, width: view.frame.width, height: 60)
         searchBar.searchBarStyle = .prominent
-        searchBar.placeholder = " Search your address"
+        searchBar.placeholder = "Enter a new address"
         searchBar.sizeToFit()
         searchBar.isTranslucent = false
         searchBar.backgroundImage = UIImage()

@@ -37,12 +37,16 @@ class DataService {
     var RefOrders: CollectionReference {
         return RefCurrentUser.collection("orders")
     }
-
+    
+    var RefPayments: CollectionReference {
+        return RefCurrentUser.collection("payments")
+    }
+    
     // MARK: - Functions
     
     // SAVE USER DETAILS
     func saveUserDetails(userId: String, data: [String: Any], complete: @escaping (Bool, Error?) -> Void) {
-        self.RefCurrentUser.setData(data, merge: true) { (error) in
+        Firestore.firestore().collection("customers").document(userId).setData(data, merge: true) { (error) in
             if let error = error {
                 print("Error saving user details: ", error)
                 complete(false, error)
@@ -74,7 +78,7 @@ class DataService {
     
     
     // CREATE STRIPE PAYMENT METHOD
-    func createStripePaymentMethod(primaryCard: String, cardNumber: String, month: UInt, year: UInt, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
+    func createStripePaymentMethod(primaryCard: String?, cardNumber: String, month: UInt, year: UInt, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
         
         let cardParams = STPCardParams()
         cardParams.number = cardNumber
@@ -102,11 +106,16 @@ class DataService {
     
     
     // ADD PAYMENT METHOD
-    func addPaymentMethod(primaryCard: String, tokenId: String, number: String, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
+    func addPaymentMethod(primaryCard: String?, tokenId: String, number: String, cvc: String, complete: @escaping (Bool, Error?) -> Void) {
+        
         RefPaymentsMethods.document(tokenId).setData(["id": tokenId, "number": number, "cvc": cvc], merge: true) { (error) in
             if let error = error {
                 complete(false, error)
             } else {
+                guard let primaryCard = primaryCard else {
+                    complete(true, nil)
+                    return
+                }
                 self.RefPaymentsMethods.document(primaryCard).updateData(["primary": false]) { (error) in
                     if let error = error {
                         complete(false, error)
@@ -118,6 +127,19 @@ class DataService {
         }
     }
     
+    // UPDATE PAYMENT METHOD
+    
+    func updatePaymentMethod(cardId: String, name: String?, month: UInt, year: UInt, complete: @escaping (Bool, Error?) -> Void) {
+        RefPaymentsMethods.document(cardId).updateData(["month": month, "year": year]) { (error) in
+            if let error = error {
+                complete(false, error)
+            } else {
+                complete(true, nil)
+            }
+        }
+    }
+    
+    
     
     // FETCH PRIMARY PAYMENT METHOD
     func fetchPrimaryPaymentMethod(cardId: String, complete: @escaping (Card?, Error?) -> Void) {
@@ -126,10 +148,10 @@ class DataService {
                 complete(nil, error)
             } else {
                 guard let snapshot = snapshot, let data = snapshot.data() else { return }
-                    if snapshot.exists {
-                        let id = snapshot.documentID
-                        let card = Card(id: id, data: data)
-                        complete(card, error)
+                if snapshot.exists {
+                    let id = snapshot.documentID
+                    let card = Card(id: id, data: data)
+                    complete(card, error)
                 }
             }
         })
@@ -224,7 +246,7 @@ class DataService {
                 complete(false, fetchError)
                 return nil
             }
-
+            
             if document.exists {
                 guard let totalPrice = document.data()?["total"] as? Double, let totalQuantity = document.data()?["quantity"] as? Int else {
                     return nil
@@ -235,7 +257,7 @@ class DataService {
                 let stripeFee = service.stripeFee
                 let serviceFee = service.serviceFee
                 let total = service.total
-
+                
                 transaction.updateData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity + totalQuantity], forDocument: ref)
             } else {
                 let service = total.serviceFee()
@@ -268,11 +290,11 @@ class DataService {
             }
         }
     }
-
+    
     // FETCH USER CURRENT ORDER
     func fetchCurrentOrder(orderId: String, complete: @escaping (Bool?, Order?, Menu?, Error?) -> Void) {
         let ref = RefOrders.document(orderId)
-        ref.getDocument { (snapshot, error) in
+        ref.addSnapshotListener { (snapshot, error) in
             if let error = error {
                 complete(false, nil, nil, error)
             } else {
@@ -282,7 +304,7 @@ class DataService {
                 }
                 let documentId =  snapshot.documentID
                 let order = Order(key: documentId, data: data)
-                ref.collection("items").getDocuments { (snapshot, error) in
+                ref.collection("items").addSnapshotListener { (snapshot, error) in
                     if let error = error {
                         complete(false, nil, nil, error)
                     } else {
@@ -297,7 +319,20 @@ class DataService {
             }
         }
     }
-
+    
+    // CLEAR ORDER
+    func clearOrder(orderId: String, complete: @escaping (Bool?, Error?) -> Void) {
+        let ref = self.RefOrders.document(orderId)
+        ref.delete { (error) in
+            if let error = error {
+                complete(false, error)
+            } else {
+                complete(true, nil)
+            }
+        }
+    }
+    
+    
     // PLACE ORDER
     func placeOrder(order: Order, card: Card, complete: @escaping (Bool?, Error?) -> Void) {
         guard let orderId = order.id else { return }
@@ -311,6 +346,14 @@ class DataService {
                     complete(false, error)
                 } else {
                     complete(true, nil)
+                    
+                    //                    self.clearOrder(orderId: orderId) { (success, error) in
+                    //                        if !success! {
+                    //                            complete(false, error)
+                    //                        } else {
+                    //                            complete(true, nil)
+                    //                        }
+                    //                    }
                 }
             }
         }
@@ -318,7 +361,7 @@ class DataService {
     
     // COMPLETE ORDER CHARGE
     func completeCharge(destination: String, destinationName: String, subtotal: Double, total: Double, card: Card?, complete: @escaping (Bool, String?, Error?) -> Void) {
-        guard let number = card?.cardNumber, let month = card?.month, let year = card?.year, let cvv = card?.cvv else { return }
+        guard let number = card?.cardNumber, let month = card?.month, let year = card?.year, let cvv = card?.cvc else { return }
         
         let cardParams = STPCardParams()
         cardParams.number =  number
@@ -331,7 +374,7 @@ class DataService {
                 complete(false, nil, error)
                 return
             }
-            self.RefPaymentsMethods.document(token.tokenId).setData(["subtotal": subtotal, "total": total, "currency" : "usd", "payment_method": token.tokenId, "destination": destination, "provider_name": destinationName], merge: true) { (error) in
+            self.RefPayments.document(token.tokenId).setData(["subtotal": subtotal, "total": total, "currency" : "usd", "payment_method": token.tokenId, "destination": destination, "provider_name": destinationName], merge: true) { (error) in
                 if let error = error {
                     complete(false, nil, error)
                 } else {

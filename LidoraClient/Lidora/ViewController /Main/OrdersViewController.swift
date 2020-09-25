@@ -50,7 +50,7 @@ class OrdersViewController: UIViewController, ListAdapterDataSource {
                 print("Error: ", error)
             } else {
                 self.orders.append(order!)
-//                self.adapter.performUpdates(animated: true)
+                self.adapter.performUpdates(animated: true)
             }
         }
     }

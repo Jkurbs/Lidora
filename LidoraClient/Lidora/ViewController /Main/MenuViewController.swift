@@ -105,7 +105,7 @@ extension MenuViewController: ListSingleSectionControllerDelegate {
         if let menu = object as? Menu {
             self.curtainController?.moveCurtain(to: .mid, animated: true)
             NotificationCenter.default.post(name: NSNotification.Name("menu"), object: self, userInfo: ["menu": menu])
-            if let cardViewController = curtainController?.curtainViewController as? CardViewController {
+            if let navigationController = curtainController?.curtainViewController as? UINavigationController, let cardViewController = navigationController.topViewController as? CardViewController {
                 cardViewController.chef = self.chef.first
                 cardViewController.overView.chef = self.chef.first
                 cardViewController.cardState = .overview

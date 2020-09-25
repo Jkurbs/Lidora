@@ -18,28 +18,33 @@ enum CardState: String, CaseIterable {
 
 class CardViewController: UIViewController {
     
-    let titleView = TitleView() 
     let emptyView = EmptyView()
     let overView = OverView() 
     var proceedButton = LoadingButton()
+    
     var user: User?
     var chef: Chef?
+    
+    var orderDetails = [String]()
     var order = [Order]()
     var menus = [Menu]()
     var card = [Card]()
+    
+    var cancelButton: UIBarButtonItem!
     
     var cardState = CardState.empty {
         didSet {
             switch cardState {
             case .empty:
+                self.title = "View Bag"
                 emptyView.isHidden = false
-                self.titleView.cardButton.setTitle("View Bag", for: .normal)
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
             case .notEmpty:
                 emptyView.isHidden = true
                 overView.isHidden = true
             case .overview:
+                self.title = nil
                 collectionView.isHidden = true
                 emptyView.isHidden = true
                 overView.isHidden = false
@@ -64,16 +69,14 @@ class CardViewController: UIViewController {
         indicator.layer.position.y = 100
         indicator.layer.position.x = view.layer.position.x
         indicator.style = .medium
-        indicator.backgroundColor = .red
         indicator.hidesWhenStopped = true
         return indicator
     }()
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        self.navigationController?.isNavigationBarHidden = true
-        fetchBag()
+        self.title = "View Bag"
+        fetchOrder()
         fetchPrimaryCard()
     }
     
@@ -85,13 +88,17 @@ class CardViewController: UIViewController {
     // MARK: - Functions
     
     func setupViews() {
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 10.0
+        navigationController?.view.layer.cornerRadius = 15
+        navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.tintColor = .systemGreen
+        
         view.backgroundColor = UIColor.white
-
-        view.addSubview(titleView)
-        titleView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
-        titleView.cardButton.addTarget(self, action: #selector(handleCardButton), for: .touchUpInside)
+        
+        cardState = .none
+        
+        cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
         
         emptyView.isHidden = false
         overView.isHidden = true
@@ -103,7 +110,7 @@ class CardViewController: UIViewController {
         view.addSubview(collectionView)
         collectionView.isHidden = true
         collectionView.backgroundColor = .white
-        collectionView.frame = CGRect(x: 0, y: 60, width: view.frame.width, height: view.frame.height)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         adapter.collectionView = collectionView
         adapter.dataSource = self
         
@@ -111,12 +118,19 @@ class CardViewController: UIViewController {
         proceedButton.enable()
         proceedButton.translatesAutoresizingMaskIntoConstraints = false
         proceedButton.setTitle("Place Order", for: .normal)
-        proceedButton.backgroundColor = .systemBlue
+        proceedButton.backgroundColor = .systemGreen
         proceedButton.addTarget(self, action: #selector(placeOrder), for: .touchUpInside)
-    
+        
         NSLayoutConstraint.activate([
             emptyView.widthAnchor.constraint(equalTo: view.widthAnchor),
             emptyView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100.0),
+
+            
             overView.widthAnchor.constraint(equalTo: view.widthAnchor),
             overView.heightAnchor.constraint(equalTo: view.heightAnchor),
             proceedButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32.0),
@@ -124,28 +138,32 @@ class CardViewController: UIViewController {
             proceedButton.heightAnchor.constraint(equalToConstant: 60.0),
             proceedButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
-
+        
         NotificationCenter.default.addObserver(self, selector: #selector(addToOrder(_:)), name: .addToBag, object: nil)
     }
     
     // MARK: - Functions
-
-    func fetchBag() {
+    
+    func fetchOrder() {
         guard let orderId = user?.orderId else { return }
         DataService.shared.fetchCurrentOrder(orderId: orderId) { (success, order, menu, error) in
             if !success! {
                 self.cardState = .none
             } else {
+                self.title = "View Bag - \(order!.quantity!)"
                 self.cardState = .notEmpty
-                self.titleView.cardButton.setTitle("View Bag - \(order!.quantity!)", for: .normal)
+                self.orderDetails.append(order!.providerName)
                 self.order.append(order!)
                 self.menus.append(menu!)
                 self.adapter.performUpdates(animated: true)
                 self.adapter.reloadObjects(self.menus)
                 self.adapter.reloadObjects(self.order)
-
             }
         }
+    }
+    
+    func clearOrder() {
+        
     }
     
     func fetchPrimaryCard() {
@@ -155,9 +173,8 @@ class CardViewController: UIViewController {
                 print("Error getting payment methods: ", error)
             } else {
                 self.card.append(card!)
-                DispatchQueue.main.async {
-                    self.adapter.performUpdates(animated: true)
-                }
+                self.adapter.performUpdates(animated: true)
+                self.adapter.reloadObjects(self.card)
             }
         }
     }
@@ -175,7 +192,7 @@ class CardViewController: UIViewController {
                     if !success! {
                         print("Error adding to bag: ", error!)
                     } else {
-                        self.fetchBag()
+                        self.fetchOrder()
                     }
                 }
             }
@@ -194,11 +211,16 @@ class CardViewController: UIViewController {
             if let _ = error {
                 self.proceedButton.hideLoading()
             } else {
+                self.order.removeAll()
                 self.view.showMessage("Order placed", type: .success)
                 self.cardState = .empty
                 self.proceedButton.hideLoading()
             }
         }
+    }
+    
+    @objc func cancel() {
+        self.curtainController?.moveCurtain(to: .min, animated: true)
     }
 }
 
@@ -210,40 +232,32 @@ extension CardViewController: CurtainDelegate {
         if cardState == .overview {
             switch heightState {
             case .min:
-                view.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.cardButton.setTitleColor(.white, for: .normal)
                 emptyView.isHidden = true
                 overView.isHidden = true
                 cardState = .notEmpty
             case .mid:
                 overView.isHidden = false
-                print("")
             case .max:
                 overView.isHidden = false
-               print("")
             default:
                 break
             }
         }
-
+        
         if cardState == .notEmpty {
             switch heightState {
             case .min:
-                view.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.cardButton.setTitleColor(.white, for: .normal)
+                self.navigationItem.leftBarButtonItem = nil
+                let quantity = self.order.first?.quantity
+                self.title = "View Bag - \(quantity ?? 0)"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
             case .mid:
-                view.backgroundColor = .white
-                titleView.cardButton.setTitleColor(.darkText, for: .normal)
+                self.navigationItem.leftBarButtonItem = cancelButton
                 collectionView.isHidden = false
                 proceedButton.isHidden = false
             case .max:
-                titleView.backgroundColor = .white
-                titleView.cardButton.setTitleColor(.darkText, for: .normal)
                 collectionView.isHidden = false
                 proceedButton.isHidden = false
             default:
@@ -252,21 +266,17 @@ extension CardViewController: CurtainDelegate {
         } else {
             switch heightState {
             case .min:
-                view.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.backgroundColor = UIColor(white: 0.8, alpha: 1.0)
-                titleView.cardButton.setTitleColor(.white, for: .normal)
+                self.navigationItem.leftBarButtonItem = nil
+                self.title = "View Bag"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
             case .mid:
-                view.backgroundColor = .white
-                titleView.backgroundColor = .white
+                self.navigationItem.leftBarButtonItem = cancelButton
                 emptyView.isHidden = false
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
             case .max:
-                titleView.backgroundColor = .white
-                view.backgroundColor = .white
                 emptyView.isHidden = false
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
@@ -285,7 +295,7 @@ extension CardViewController: CurtainDelegate {
 extension CardViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-        var data = ["1"] as [ListDiffable]
+        var data = orderDetails as [ListDiffable]
         data += menus as [ListDiffable]
         data += card as [ListDiffable]
         data += order as [ListDiffable]

@@ -29,7 +29,7 @@ class OverView: UIView {
     
     lazy var button: UIButton = {
         let button = UIButton(type: .custom)
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .systemGreen
         button.layer.cornerRadius = 10.0
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
         button.setTitle("Add to bag", for: .normal)

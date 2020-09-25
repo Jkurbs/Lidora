@@ -30,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         handle = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
             guard let self = self else { return }
             if user == nil {
-                self.setupRootViewController(viewController: AuthViewController())
+                self.setupRootViewController(viewController: WelcomeViewController())
             } else {
                 // Fetch user
                 guard let user = user else { return }
@@ -41,19 +41,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         let mainViewController = MainViewController()
                         mainViewController.user = user
                         self.locationService.locationView = mainViewController.locationView
-                        let navigationController = UINavigationController(rootViewController:  mainViewController)
+                        let navigationController = UINavigationController(rootViewController: mainViewController)
                         let cardViewController = CardViewController()
                         let cardNavigationController = UINavigationController(rootViewController:  cardViewController)
 
                         cardViewController.user = user
                                 
-                        let curtainController = CurtainController(content: navigationController, curtain: cardViewController)
+                        let curtainController = CurtainController(content: navigationController, curtain: cardNavigationController)
                                 
                         curtainController.curtain.maxHeightCoefficient = 0.95
                         curtainController.curtain.midHeightCoefficient = 0.5
                         curtainController.curtain.minHeightCoefficient = 0.12
 
-                        curtainController.curtain.handleIndicatorColor = .lightText
+                        curtainController.curtain.handleIndicatorColor = .lightGray
                         curtainController.curtain.showsHandleIndicator = true
                         curtainController.curtain.bottomBounce = false
                         curtainController.curtain.topBounce = false

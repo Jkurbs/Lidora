@@ -24,7 +24,8 @@ class HeaderCell: UICollectionViewCell {
         addSubview(label)
         
         NSLayoutConstraint.activate([
-            label.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.widthAnchor.constraint(equalTo: widthAnchor, constant: -32.0),
             label.heightAnchor.constraint(equalTo: heightAnchor),
         ])
     }

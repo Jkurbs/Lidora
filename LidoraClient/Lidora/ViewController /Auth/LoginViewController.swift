@@ -1,8 +1,8 @@
 //
-//  AuthViewController.swift
+//  LoginViewController.swift
 //  Lidora
 //
-//  Created by Kerby Jean on 9/15/20.
+//  Created by Kerby Jean on 9/23/20.
 //
 
 import UIKit
@@ -15,10 +15,8 @@ enum AuthChoice {
 
 class AuthViewController: UIViewController {
     
-    var segmentedCtrl: UISegmentedControl!
-    
-    var phone = ""
     var label = UILabel()
+    var descriptionLabel = UILabel()
     var detailField = FieldRect()
     var passwordField = FieldRect()
     var nextButton = LoadingButton()
@@ -33,6 +31,7 @@ class AuthViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.isNavigationBarHidden = true
+        updateViews()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -46,24 +45,21 @@ class AuthViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         view.addSubview(label)
-        label.font = UIFont.systemFont(ofSize: 28)
-        label.text = "Log In"
-        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 35)
         label.sizeToFit()
         label.translatesAutoresizingMaskIntoConstraints = false
         
-        segmentedCtrl = UISegmentedControl(items: ["Log In", "Register"])
-        segmentedCtrl.selectedSegmentIndex = 0
-        segmentedCtrl.translatesAutoresizingMaskIntoConstraints = false
-        segmentedCtrl.addTarget(self, action: #selector(authChanged), for: .valueChanged)
-        view.addSubview(segmentedCtrl)
-        
+        view.addSubview(descriptionLabel)
+        descriptionLabel.font = UIFont.systemFont(ofSize: 16)
+        descriptionLabel.textColor = .lightGray
+        descriptionLabel.sizeToFit()
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+
         detailField.keyboardType = .emailAddress
         detailField.autocorrectionType = .no
         detailField.autocapitalizationType = .none
         detailField.backgroundColor = .systemGray6
         detailField.placeholder = "email address"
-        detailField.textColor = .secondaryLabel
         detailField.translatesAutoresizingMaskIntoConstraints = false
         detailField.setBorder()
         view.addSubview(detailField)
@@ -72,7 +68,6 @@ class AuthViewController: UIViewController {
         passwordField.backgroundColor = .systemGray6
         passwordField.placeholder = "Password"
         passwordField.textContentType = .password
-        passwordField.textColor = .label
         passwordField.translatesAutoresizingMaskIntoConstraints = false
         passwordField.setBorder()
         view.addSubview(passwordField)
@@ -85,18 +80,18 @@ class AuthViewController: UIViewController {
         
         view.addSubview(nextButton)
         
-        
         NSLayoutConstraint.activate([
         
             label.topAnchor.constraint(equalTo: view.topAnchor, constant: 80.0),
             label.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -56.0),
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            segmentedCtrl.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 24.0),
-            segmentedCtrl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            segmentedCtrl.widthAnchor.constraint(equalTo: label.widthAnchor),
         
-            detailField.topAnchor.constraint(equalTo: segmentedCtrl.bottomAnchor, constant: 40.0),
+            descriptionLabel.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 8.0),
+            descriptionLabel.leftAnchor.constraint(equalTo: label.leftAnchor),
+            descriptionLabel.rightAnchor.constraint(equalTo: label.rightAnchor, constant: -16.0),
+            descriptionLabel.heightAnchor.constraint(equalToConstant: 32.0),
+        
+            detailField.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 40.0),
             detailField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             detailField.widthAnchor.constraint(equalTo: label.widthAnchor),
             detailField.heightAnchor.constraint(equalToConstant: 46.0),
@@ -113,15 +108,15 @@ class AuthViewController: UIViewController {
         ])
     }
     
-    @objc func authChanged(_ sender: UISegmentedControl) {
-        if sender.selectedSegmentIndex == 0 {
-            authChoice = .login
-            self.label.text = "Log In"
+    func updateViews() {
+        if authChoice == .login {
+            self.label.text = "Welcome to Lidora"
+            self.descriptionLabel.text = "Log back into your account"
             self.nextButton.setTitle("Log In", for: .normal)
         } else {
-            authChoice = .register
-            self.label.text = "Register"
-            self.nextButton.setTitle("Register", for: .normal)
+            self.label.text = "Welcome to Lidora"
+            self.descriptionLabel.text = "Create an account"
+            self.nextButton.setTitle("Next", for: .normal)
         }
     }
     
@@ -150,11 +145,12 @@ class AuthViewController: UIViewController {
     }
     
     func registerNext() {
-//        if let email = detailField.text, let password = passwordField.text {
-//            let vc = UsernameVC()
-//            vc.data = [email, password]
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+        if let email = self.detailField.text, let pwd = self.passwordField.text {
+            let vc = UsernameViewController()
+            vc.data.append(email)
+            vc.data.append(pwd)
+            navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     

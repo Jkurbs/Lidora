@@ -13,16 +13,23 @@ import FormTextField
 
 class PaymentViewController: UIViewController {
     
+    // MARK: - Properties
+    
     var stackView: UIStackView!
     var detailsStackView: UIStackView!
+    var cardStackView: UIStackView!
     let descriptionLabel = UILabel()
+    let cardImageView = UIImageView()
+    
     let card1ImageView = UIImageView()
     let card2ImageView = UIImageView()
     let card3ImageView = UIImageView()
     let card4ImageView = UIImageView()
     let securityLabel = UILabel()
     var button: LoadingButton!
-    var primaryCardId: String? 
+    var primaryCardId: String?
+    
+    var card: Card?
     
     lazy var nameField: FormTextField = {
         let textField = FormTextField()
@@ -110,8 +117,7 @@ class PaymentViewController: UIViewController {
         return view
     }()
     
-    
-    var card: Card?
+    // MARK: View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -128,7 +134,15 @@ class PaymentViewController: UIViewController {
         self.title = "Card Information"
         view.backgroundColor = .white
         
+        cardImageView.contentMode = .scaleAspectFit
         descriptionLabel.text = "Credit or Debit card"
+        
+        detailsStackView = UIStackView(arrangedSubviews: [cardImageView, descriptionLabel])
+        detailsStackView.spacing = 8.0
+        detailsStackView.axis = .horizontal
+        detailsStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(detailsStackView)
+        
         card1ImageView.image = UIImage(named: "visa")
         card2ImageView.image = UIImage(named: "mastercard")
         card3ImageView.image = UIImage(named: "amex")
@@ -139,10 +153,10 @@ class PaymentViewController: UIViewController {
         card3ImageView.contentMode = .scaleAspectFit
         card4ImageView.contentMode = .scaleAspectFit
         
-        detailsStackView = UIStackView(arrangedSubviews: [descriptionLabel, card1ImageView, card2ImageView, card3ImageView, card4ImageView])
-        detailsStackView.axis = .horizontal
-        detailsStackView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(detailsStackView)
+        cardStackView = UIStackView(arrangedSubviews: [card1ImageView, card2ImageView, card3ImageView, card4ImageView])
+        cardStackView.axis = .horizontal
+        cardStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(cardStackView)
         
         securityLabel.text = "Your payment methods are saved and stored securely."
         securityLabel.font = UIFont.systemFont(ofSize: 13)
@@ -158,12 +172,15 @@ class PaymentViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             
+            detailsStackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16.0),
             detailsStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            detailsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            detailsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -40),
             detailsStackView.heightAnchor.constraint(equalToConstant: 40),
             
-            stackView.topAnchor.constraint(equalTo: detailsStackView.bottomAnchor, constant: 20),
+            cardStackView.topAnchor.constraint(equalTo: detailsStackView.topAnchor, constant: 0),
+            cardStackView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
+            cardStackView.heightAnchor.constraint(equalToConstant: 40),
+            
+            stackView.topAnchor.constraint(equalTo: cardStackView.bottomAnchor, constant: 20),
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -30),
             stackView.heightAnchor.constraint(equalToConstant: view.frame.height/2.8),
@@ -171,10 +188,15 @@ class PaymentViewController: UIViewController {
     }
     
     func updateViews() {
-        if card != nil {
-            // Update
-        } else {
-            // Do nothing
+        if let card = card, let last4 = card.last4, let month = card.month, let year = card.year {
+            self.title = "Card details"
+            self.cardStackView.isHidden = true
+            self.stackView.removeArrangedSubview(self.cardNumberField)
+            self.cardNumberField.removeFromSuperview()
+            self.descriptionLabel.text = "*\(last4)"
+            self.cardImageView.image = UIImage(named: card.brand.rawValue)
+            self.nameField.text = "Kerby Jean"
+            self.cardExpirationDateField.text = "0\(month)/\(year % 100)"
         }
     }
     
@@ -182,13 +204,8 @@ class PaymentViewController: UIViewController {
     
     @objc func addPaymentMethod(_ button: UIButton) {
         
-        guard cardNumberField.validate(), cardExpirationDateField.validate(), cvcField.validate() else { return }
-        
-        let cardParams = STPCardParams()
-        cardParams.number = cardNumberField.text
-        
         self.button.showLoading()
-
+        
         if let expirationText = cardExpirationDateField.text {
             let monthStartIndex = expirationText.index(expirationText.startIndex, offsetBy: 0)
             let monthEndIndex = expirationText.index(monthStartIndex, offsetBy: 2)
@@ -198,28 +215,46 @@ class PaymentViewController: UIViewController {
             let yearEndIndex = expirationText.index(expirationText.endIndex, offsetBy: 0)
             let expYear = (expirationText[yearStartIndex..<yearEndIndex])
             let year = UInt(expYear)!
-        
-            DataService.shared.createStripePaymentMethod(primaryCard: self.primaryCardId ?? "" ,cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
-                if !success {
-                    print("Error: ", error!)
-                    self.button.hideLoading()
-                } else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            
+            if let card = card {
+                guard cvcField.text != card.cvc else {
+                    self.view.showMessage("The cvc doesn't match the cvc of the card.", type: .error)
+                    return
+                }
+                // Update Card
+                DataService.shared.updatePaymentMethod(cardId: card.id, name: nil, month: month, year: year) { (success, error) in
+                    if !success {
                         self.button.hideLoading()
-                        self.view.showMessage("Card successfully added", type: .success)
+                        self.view.showMessage("An error occured while updatig the card", type: .error)
+                    } else {
+                        self.button.hideLoading()
+                        self.view.showMessage("Card successfully updated", type: .success)
+                    }
+                }
+            } else {
+                // Add New Card
+                guard cardNumberField.validate(), cardExpirationDateField.validate(), cvcField.validate() else { return }
+                
+                let cardParams = STPCardParams()
+                cardParams.number = cardNumberField.text
+                
+                DataService.shared.createStripePaymentMethod(primaryCard: self.primaryCardId ?? nil ,cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
+                    if !success {
+                        self.button.hideLoading()
+                        self.view.showMessage("An error occured while saving the card", type: .error)
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self.button.hideLoading()
+                            self.view.showMessage("Card successfully added", type: .success)
+                        }
                     }
                 }
             }
         }
     }
-    
-    func disable() {
-        navigationItem.backBarButtonItem?.isEnabled = false
-        buttonView.isUserInteractionEnabled = false 
-        
-    }
 }
 
+// MARK: - UITextFieldDelegate
 
 extension PaymentViewController: UITextFieldDelegate {
     

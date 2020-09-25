@@ -15,7 +15,7 @@ class LoadingButton: UIButton {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.backgroundColor = .systemBlue
+        self.backgroundColor = .systemGreen
         self.layer.cornerRadius = 5
         self.isEnabled = false
         self.alpha = 0.5

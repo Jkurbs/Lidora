@@ -32,7 +32,7 @@ class Card {
     
     var id: String!
     var cardNumber: String!
-    var cvv: String!
+    var cvc: String!
     var brand: CardBrand!
     var last4: String!
     var month: UInt!
@@ -42,14 +42,14 @@ class Card {
     init(id: String, data: [String: Any]) {
         self.id = id
         
-        guard let brandData = data["brand"] as? String, let last4 = data["last4"] as? String, let month = data["month"] as? UInt, let year = data["year"] as? UInt, let cardNumber = data["number"] as? String, let cvv = data["cvc"] as? String, let brand = CardBrand(rawValue: brandData), let primary =  data["primary"] as? Bool  else { return }
+        guard let brandData = data["brand"] as? String, let last4 = data["last4"] as? String, let month = data["month"] as? UInt, let year = data["year"] as? UInt, let cardNumber = data["number"] as? String, let cvc = data["cvc"] as? String, let brand = CardBrand(rawValue: brandData), let primary =  data["primary"] as? Bool  else { return }
         
         self.brand = brand
         self.last4 = last4
         self.month = month
         self.year = year
         self.cardNumber = cardNumber
-        self.cvv = cvv
+        self.cvc = cvc
         self.primary = primary
     }
 }

@@ -34,6 +34,8 @@ class SettingsViewController: UIViewController {
     var tableView: UITableView!
     var settings = Settings.allCases
     
+    var user: User?
+    
     // MARK: - View Lifecycle
     
     override func viewDidLoad() {

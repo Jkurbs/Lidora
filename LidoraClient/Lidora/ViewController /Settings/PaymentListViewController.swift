@@ -14,14 +14,8 @@ class PaymentListViewController: UIViewController {
     // MARK: - Properties
     
     var tableView: UITableView!
-    var currentCard: Card? 
-    var cards = [Card]()
-    
-    var delegate: CardDelegate?
     var emptyView = EmptyView()
     
-    var selectedIndex: IndexPath?
-
     lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
         indicator.layer.position.y = 100
@@ -31,7 +25,11 @@ class PaymentListViewController: UIViewController {
         indicator.hidesWhenStopped = true
         return indicator
     }()
-
+    
+    var currentCard: Card? 
+    var cards = [Card]()
+    var delegate: CardDelegate?
+    var selectedIndex: IndexPath?
     
     // MARK: - View Lifecycle
     
@@ -46,6 +44,8 @@ class PaymentListViewController: UIViewController {
         setupViews()
     }
     
+    // MARK: - Functions
+    
     func setupViews() {
         
         self.title = "Payments"
@@ -53,8 +53,8 @@ class PaymentListViewController: UIViewController {
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add new Payment", style: .done, target: self, action: #selector(goToAddNewPaymentVC))
         
-        let displayWidth: CGFloat = self.view.frame.width
-        let displayHeight: CGFloat = self.view.frame.height
+        let displayWidth = self.view.frame.width
+        let displayHeight = self.view.frame.height
         
         tableView = UITableView(frame: CGRect(x: 0, y: 0, width: displayWidth, height: displayHeight))
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -76,20 +76,16 @@ class PaymentListViewController: UIViewController {
     }
     
     func updateViews() {
-        if let _ = currentCard {
-            self.navigationItem.rightBarButtonItem = nil
-            self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(changePaymentMethod))
-        }
+        guard currentCard != nil else { return }
+        self.navigationItem.rightBarButtonItem = nil
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(changePaymentMethod))
     }
     
     @objc func changePaymentMethod() {
-        self.dismiss(animated: true, completion: nil)
+        self.navigationController?.popViewController(animated: true)
     }
     
-    // MARK: - Functions
-    
     @objc func goToAddNewPaymentVC() {
-        
         let vc = PaymentViewController()
         if let primaryCardId = self.cards.filter({$0.primary == true}).first?.id {
             vc.primaryCardId = primaryCardId
@@ -125,24 +121,23 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
         1
     }
     
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cards.count
+        cards.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
         cell.selectionStyle = .none
-
+        
         let card = self.cards[indexPath.row]
         cell.backgroundColor = .systemBackground
         cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         guard let brand = card.brand else { return UITableViewCell() }
-
+        
         cell.imageView?.image = UIImage(named: brand.rawValue)
         cell.textLabel?.text = "\(brand.rawValue.capitalized) *\(card.last4 ?? "****")"
         cell.detailTextLabel?.text = card.primary! ? "Primary" : ""
-
+        
         if let _ = currentCard {
             if card.primary == true {
                 tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
@@ -172,27 +167,34 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         60.0
     }
-
+    
     func showAlert(index: Int, card: Card) {
         let alert = UIAlertController(title: "Options", message: nil, preferredStyle: .actionSheet)
         let editCard = UIAlertAction(title: "Edit Card", style: .default) { (action) in
-           // let paymentViewController = PaymentViewController()
-           // navigationController?.pushViewController(paymentViewController, animated: true)
+            let paymentViewController = PaymentViewController()
+            paymentViewController.card = card
+            self.navigationController?.pushViewController(paymentViewController, animated: true)
         }
-        
         
         let remove = UIAlertAction(title: "Remove", style: .destructive) { (action) in
             // Remove
-            self.cards.remove(at: index)
-            DataService.shared.removePaymentMethod(id: card.id) { (success, error) in
-                if !success {
-                    print("Error deleting payment method: ", error!)
-                } else {
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
+            let removeAlert = UIAlertController(title: "", message: "Are you sure you want to remove the card?\nOnce removed it can't be undone.", preferredStyle: .actionSheet)
+            let yesAction = UIAlertAction(title: "Remove", style: .destructive) { (action) in
+                DataService.shared.removePaymentMethod(id: card.id) { (success, error) in
+                    if !success {
+                        print("Error deleting payment method: ", error!)
+                    } else {
+                        DispatchQueue.main.async {
+                            self.cards.remove(at: index)
+                            self.tableView.reloadData()
+                        }
                     }
                 }
             }
+            let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            removeAlert.addAction(yesAction)
+            removeAlert.addAction(cancel)
+            self.present(removeAlert, animated: true, completion: nil)
         }
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alert.addAction(editCard)

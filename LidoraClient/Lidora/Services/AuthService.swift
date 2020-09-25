@@ -108,7 +108,7 @@ class AuthService {
     
     // MARK: - Create account
     
-    func createAccount(firstName: String, lastName: String?, username: String, email: String, pwd: String, complete: @escaping (Bool, Error?) -> Void) {
+    func createAccount(firstName: String, lastName: String?, email: String, pwd: String, complete: @escaping (Bool, Error?) -> Void) {
         
         Auth.auth().createUser(withEmail: email, password: pwd) { result, error in
             if let error = error {
@@ -121,7 +121,7 @@ class AuthService {
                     let changeRequest = user.createProfileChangeRequest()
                     changeRequest.displayName = "\(firstName) \(lastName ?? "")"
                     changeRequest.commitChanges { error in
-                        let data: [String: Any] = ["email": email, "firstName": firstName, "lastName": firstName, "username": username]
+                        let data: [String: Any] = ["first_name": firstName, "last_name": firstName]
                         DataService.shared.saveUserDetails(userId: user.uid, data: data) { (success, error) in
                             if !success {
                                 complete(false, error)

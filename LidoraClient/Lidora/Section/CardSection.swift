@@ -14,7 +14,7 @@ class CardSection: ListSectionController {
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
-        if index == 1 {
+        if index == 1 || index == 4 {
             return CGSize(width: width, height: 60)
         } else {
             return CGSize(width: width, height: 30)
@@ -23,8 +23,7 @@ class CardSection: ListSectionController {
     
     override init() {
         super.init()
-        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
-
+        self.inset = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
     }
     
     override func numberOfItems() -> Int {
@@ -53,9 +52,8 @@ class CardSection: ListSectionController {
         if index == 1 {
             let paymentListViewController = PaymentListViewController()
             paymentListViewController.currentCard = card
-            let navigationController = UINavigationController(rootViewController: paymentListViewController)
             paymentListViewController.delegate = self.viewController as? CardViewController
-            self.viewController?.present(navigationController, animated: true, completion: nil)
+            self.viewController?.navigationController?.pushViewController(paymentListViewController, animated: true)
         }
     }
 }
@@ -77,7 +75,7 @@ class TotalSection: ListSectionController {
     }
     
     override func numberOfItems() -> Int {
-        3
+        4
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
@@ -88,9 +86,13 @@ class TotalSection: ListSectionController {
         } else if index == 1 {
             cell.updateViews(title: "Service Fee", value: order!.serviceFee)
             cell.separator.isHidden = true
-        } else {
+        } else if index == 2 {
             cell.label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
             cell.updateViews(title: "Total", value: order?.total)
+        } else {
+            guard let cell = collectionContext?.dequeueReusableCell(of: ClearBagCell.self, for: self, at: index) as? ClearBagCell else {
+                fatalError()}
+            return cell
         }
         return cell
     }
