@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Messaging.messaging().delegate = self
         Stripe.setDefaultPublishableKey(Keys.stripe.rawValue)
 
+        Auth.auth().settings?.isAppVerificationDisabledForTesting = true
         
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
@@ -40,6 +41,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 return
             }
         }
+        
+        //get application instance ID
+       InstanceID.instanceID().instanceID { (result, error) in
+           if let error = error {
+               print("Error fetching remote instance ID: \(error)")
+           } else if let result = result {
+               print("Remote instance ID token: \(result.token)")
+           }
+       }
         
         application.registerForRemoteNotifications()
         IQKeyboardManager.shared.enable = true
@@ -55,6 +65,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Print full message.
         print(userInfo)
+    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification notification: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if Auth.auth().canHandleNotification(notification) {
+            completionHandler(.noData)
+            return
+        }
+        // This notification is not auth related, developer should handle it.
+    }
+    
+    
+    func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
+        if Auth.auth().canHandle(url) {
+            return true
+        }
+        // URL not auth related, developer should handle it.
+        return false
+    }
+    
+    // For iOS 8-
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        if Auth.auth().canHandle(url) {
+            return true
+        }
+        // URL not auth related, developer should handle it.
+        return false
+    }
+    
+    
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+      Messaging.messaging().apnsToken = deviceToken
+        Auth.auth().setAPNSToken(deviceToken, type: .unknown)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -128,7 +172,7 @@ extension AppDelegate: MessagingDelegate{
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
         print("Firebase registration token: \(fcmToken)")
-        
+
         let dataDict:[String: String] = ["token": fcmToken]
         NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
         // TODO: If necessary send token to application server.
@@ -137,5 +181,5 @@ extension AppDelegate: MessagingDelegate{
 }
 
 
-//firebase functions:config:set dev_motivator.device_token=eYrtp7MLxUo9imrmXwFB20:APA91bFRIXrOyAgd7cgEmbm1_ghcLM2vWEUiYkzSR7lYhKRmd6Z4Rca0v3xbdgFhX570sCRkwJkGJV6z_iYAZzLXi51NNU42Wyi-QHl_USaZ7yRkSBp3wuAgAkSQaxD9UxqKbqaz-gtt
+//firebase functions:config:set index.device_token=ddWx2_inFkzPsKXSVsI1xv:APA91bFGymYMjWuE28nxcnrp2fupVQU8VlGvVSogDblcq-847Dg-yspPbYeA-Q8O9FMTFHqe8OvDOe-wch-M2q49Vh6qv35ySDEoHv-8C1PNlv-A1mMAKvr8tpVJlGrQF55mEmqJIwu1
 

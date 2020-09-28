@@ -30,7 +30,7 @@ class OrdersViewController: UIViewController, ListAdapterDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-        fetchOrders()
+        fetchUpcomingOrders()
     }
 
     func setupViews() {
@@ -44,7 +44,7 @@ class OrdersViewController: UIViewController, ListAdapterDataSource {
         adapter.dataSource = self
     }
     
-    func fetchOrders() {
+    func fetchUpcomingOrders() {
         DataService.shared.fetchUpcomingOrders { (order, error) in
             if let error = error {
                 print("Error: ", error)
@@ -62,7 +62,7 @@ extension OrdersViewController {
     }
     
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        return CardSection()
+        return UpcomingOrdersSection()
     }
     
     func emptyView(for listAdapter: ListAdapter) -> UIView? {

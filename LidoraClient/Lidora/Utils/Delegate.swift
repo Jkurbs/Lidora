@@ -11,3 +11,7 @@ import Foundation
 protocol CardDelegate {
     func switchCard(newCard: Card)
 }
+
+protocol LocationDelegate {
+    func location(line1: String, postalCode: String, city: String, state: String)
+}

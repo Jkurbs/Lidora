@@ -28,7 +28,7 @@ class LocationView: UIView {
         
         translatesAutoresizingMaskIntoConstraints = false 
         
-        backgroundColor = UIColor.tertiarySystemGroupedBackground
+        backgroundColor = UIColor.clear
         
         addSubview(imageView)
         let originalImage = UIImage(systemName: "location")

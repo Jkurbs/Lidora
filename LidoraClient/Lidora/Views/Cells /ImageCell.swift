@@ -35,9 +35,6 @@ class ImageCell: UICollectionViewCell {
             imageView.leftAnchor.constraint(equalTo: leftAnchor),
             imageView.rightAnchor.constraint(equalTo: rightAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-//            imageView.heightAnchor.constraint(equalTo: heightAnchor),
-//            imageView.widthAnchor.constraint(equalTo: widthAnchor),
             
         ])
     }
@@ -88,6 +85,8 @@ class TitleCell: UICollectionViewCell {
     }
     
     func setupViews() {
+        self.layer.masksToBounds = true
+        self.contentView.layer.cornerRadius = 10
         addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 30, weight: .medium)

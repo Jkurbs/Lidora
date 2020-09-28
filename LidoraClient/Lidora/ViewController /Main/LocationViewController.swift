@@ -8,7 +8,6 @@
 import UIKit
 import MapKit
 
-
 class LocationViewController: UIViewController {
     
     var tableView: UITableView!
@@ -16,7 +15,10 @@ class LocationViewController: UIViewController {
     var searchCompleter = MKLocalSearchCompleter()
     var searchResults = [MKLocalSearchCompletion]()
     var currentAddress: String?
-
+    
+    var delegate: LocationDelegate?
+    var doneButtonItem: UIBarButtonItem!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
@@ -29,14 +31,15 @@ class LocationViewController: UIViewController {
     
     func setupViews() {
         view.backgroundColor = .white
-        self.title = "Change location"
         
-        let doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
+        searchCompleter.resultTypes = [.address]
+        
+        doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
         doneButtonItem.isEnabled = false
         navigationItem.rightBarButtonItem = doneButtonItem
         
         searchCompleter.delegate = self
-
+        
         searchBar.frame = CGRect(x: 0, y: 60, width: view.frame.width, height: 60)
         searchBar.searchBarStyle = .prominent
         searchBar.placeholder = "Enter a new address"
@@ -45,7 +48,7 @@ class LocationViewController: UIViewController {
         searchBar.backgroundImage = UIImage()
         searchBar.delegate = self
         view.addSubview(searchBar)
-
+        
         navigationController?.navigationBar.tintColor = .darkText
         
         tableView = UITableView(frame: CGRect(x: 0, y: 120, width: view.frame.width, height: view.frame.height - 60), style: .plain)
@@ -57,6 +60,13 @@ class LocationViewController: UIViewController {
     
     @objc func done() {
         
+    }
+    
+    
+    func updateCurrentLocation() {
+        if currentAddress == nil {
+            
+        }
     }
 }
 
@@ -85,38 +95,35 @@ extension LocationViewController: MKLocalSearchCompleterDelegate {
 extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 1
-        } else {
-            return searchResults.count
-        }
+        return searchResults.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
-        let originalImage = UIImage(systemName: "location")
-        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-        cell.imageView?.image = image
-        if indexPath.section == 0 {
-            cell.textLabel?.text = self.currentAddress
-        } else {
-            let searchResult = searchResults[indexPath.row]
-            cell.textLabel?.text = searchResult.title
-            cell.detailTextLabel?.text = searchResult.subtitle
-        }
+//        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
+//        let originalImage = UIImage(systemName: "location")
+//        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+//        cell.imageView?.image = image
+//        if indexPath.section == 0 {
+//            cell.textLabel?.text = self.currentAddress
+//        } else {
+//            let searchResult = searchResults[indexPath.row]
+//            cell.textLabel?.text = searchResult.title
+//            cell.detailTextLabel?.text = searchResult.subtitle
+//        }
+        
+        let searchResult = searchResults[indexPath.row]
+        cell.textLabel?.text = searchResult.title
+        cell.detailTextLabel?.text = searchResult.subtitle
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.section == 0 {
-            return 60.0
-        }
         return 60.0
     }
     
@@ -124,8 +131,27 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section == 0 {
             
         } else {
+            
             let selectedResult = self.searchResults[indexPath.row]
-            print("SELECTED RESULT: ", selectedResult.subtitle)
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = selectedResult.title
+            let search = MKLocalSearch(request: request)
+            search.start { (response, error) -> Void in
+                if response == nil{
+                    return
+                }
+                if let item = response?.mapItems.first {
+                    let placemark = item.placemark
+                    if let address = placemark.name, let postalCode = placemark.postalCode, let state = placemark.administrativeArea, let city = placemark.locality {
+                        DataService.shared.updateUserLocation(line1: address, postalCode: postalCode, city: city, state: state) { (success, error) in
+                            if !success! {
+                                print("Error: ", error)
+                            }
+                            self.doneButtonItem.isEnabled = true
+                        }
+                    }
+                }
+            }
         }
         navigationItem.rightBarButtonItem?.isEnabled = true
     }

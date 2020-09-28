@@ -12,8 +12,10 @@ import CoreLocation
 class LocationService: NSObject {
     
     var locationView: LocationView?
-
+    
     var locationManager = CLLocationManager()
+    
+    var delegate: LocationDelegate?
     
     override init() {
         super.init()
@@ -70,15 +72,16 @@ extension LocationService: CLLocationManagerDelegate {
             // Look up the location and pass it to the completion handler
             geocoder.reverseGeocodeLocation(lastLocation,  completionHandler: {
                 (placemarks, error) in
-                    if error == nil {
-                        if let firstLocation = placemarks?[0], let address = firstLocation.name, let postalCode = firstLocation.postalCode, let state = firstLocation.administrativeArea, let city = firstLocation.locality {
-                            
-                            //DataService.shared.updateUserLocation(line1: address, postalCode: postalCode, state: state)
-                            self.locationView?.updateViews(address)
-                        }
+                if error == nil {
+                    if let firstLocation = placemarks?[0], let line1 = firstLocation.name, let postalCode = firstLocation.postalCode, let state = firstLocation.administrativeArea, let city = firstLocation.locality {
+                        
+                        print("GOT LOCATION: ", line1)
+                        
+                        self.delegate?.location(line1: line1, postalCode: postalCode, city: city, state: state)
                     }
-                })
-            }
+                }
+            })
+        }
         disableLocationServices()
     }
     

@@ -41,26 +41,32 @@ class AuthService {
                 complete(false, error)
             } else {
                 if let user = result?.user {
-                    
-                    /// Link email with phone credential
-                    
-                    let credential: PhoneAuthCredential = PhoneAuthProvider.provider().credential(withVerificationID: UserDefaults.standard.string(forKey: "authVerificationID")!, verificationCode: code)
-                    
-                    user.link(with: credential, completion: { _, error in
-                        if let err = error {
-                            print("Error:", err.localizedDescription)
+                    PhoneAuthProvider.provider().verifyPhoneNumber("", uiDelegate: nil) { verificationID, error in
+                        if let error = error {
+                            print("ERROR:", error.localizedDescription)
+                            complete(false, error)
+                            return
                         } else {
-                            UserDefaults.standard.set(user.uid, forKey: "userId")
-                            UserDefaults.standard.synchronize()
-                            let changeRequest = user.createProfileChangeRequest()
-                            changeRequest.displayName = name
-                            changeRequest.commitChanges { error in
-                                print("ERROR:", error?.localizedDescription ?? "")
-                                let data: [String: Any] = ["email": email, "name": name, "username": username]
+                            let credential: PhoneAuthCredential = PhoneAuthProvider.provider().credential(withVerificationID: verificationID!, verificationCode: code)
+                            /// Link email with phone credential
+                            user.link(with: credential, completion: { _, error in
+                                if let err = error {
+                                    print("Error:", err.localizedDescription)
+                                } else {
+                                    UserDefaults.standard.set(user.uid, forKey: "userId")
+                                    UserDefaults.standard.synchronize()
+                                    let changeRequest = user.createProfileChangeRequest()
+                                    changeRequest.displayName = name
+                                    changeRequest.commitChanges { error in
+                                        print("ERROR:", error?.localizedDescription ?? "")
+                                        let data: [String: Any] = ["email": email, "name": name, "username": username]
 
-                            }
+                                    }
+                                }
+                            })
                         }
-                    })
+                    }
+
                 }
             }
         }
@@ -108,7 +114,7 @@ class AuthService {
     
     // MARK: - Create account
     
-    func createAccount(firstName: String, lastName: String?, email: String, pwd: String, complete: @escaping (Bool, Error?) -> Void) {
+    func createAccount(firstName: String, lastName: String, email: String, phone: String, pwd: String, complete: @escaping (Bool, Error?) -> Void) {
         
         Auth.auth().createUser(withEmail: email, password: pwd) { result, error in
             if let error = error {
@@ -117,16 +123,28 @@ class AuthService {
                 return
             } else {
                 if let user = result?.user {
-                    print("USERID: \(user.uid)")
-                    let changeRequest = user.createProfileChangeRequest()
-                    changeRequest.displayName = "\(firstName) \(lastName ?? "")"
-                    changeRequest.commitChanges { error in
-                        let data: [String: Any] = ["first_name": firstName, "last_name": firstName]
-                        DataService.shared.saveUserDetails(userId: user.uid, data: data) { (success, error) in
-                            if !success {
-                                complete(false, error)
-                            } else {
-                                complete(true, nil)
+                    print("USER ID: ", user.uid)
+                    print("PHONE NUMBER: ", phone)
+                    PhoneAuthProvider.provider(auth: Auth.auth())
+
+                    PhoneAuthProvider.provider().verifyPhoneNumber(phone, uiDelegate: nil) { verificationID, error in
+                        if let error = error {
+                            print("ERROR:", error.localizedDescription)
+                            complete(false, error)
+                            return
+                        } else {
+                            UserDefaults.standard.set(verificationID!, forKey: "authVerificationID")
+                            let changeRequest = user.createProfileChangeRequest()
+                            changeRequest.displayName = "\(firstName) \(lastName)"
+                            changeRequest.commitChanges { error in
+                                let data: [String: Any] = ["first_name": firstName, "last_name": firstName, "phone": phone]
+                                DataService.shared.saveUserDetails(userId: user.uid, data: data) { (success, error) in
+                                    if !success {
+                                        complete(false, error)
+                                    } else {
+                                        complete(true, nil)
+                                    }
+                                }
                             }
                         }
                     }

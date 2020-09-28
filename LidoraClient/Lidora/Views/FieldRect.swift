@@ -24,6 +24,7 @@ extension UITextField {
         self.layer.cornerRadius = 5
         self.layer.borderWidth = 0.5
         self.layer.borderColor = UIColor.systemGray2.cgColor
+        backgroundColor = .systemGray6
     }
     
     func setPlaceHolderColor(_ placeholder: String) {

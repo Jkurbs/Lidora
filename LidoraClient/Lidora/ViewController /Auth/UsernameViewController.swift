@@ -91,23 +91,17 @@ class UsernameViewController: UIViewController {
         
         nextButton.showLoading()
         
-        if let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = data.first,
+        if let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = data.first, let phone = data[1] as? String,
             let password = data.last {
-            AuthService.shared.createAccount(firstName: firstName, lastName: lastName, email: email, pwd: password) { _, error in
+            AuthService.shared.createAccount(firstName: firstName, lastName: lastName, email: email, phone: "+1\(phone)", pwd: password) { _, error in
                 if let error = error {
                     NSLog("error: \(error)")
                     self.nextButton.hideLoading()
                 } else {
                     self.nextButton.hideLoading()
-                    
-                    let vc = LocationViewController()
-                    vc.title = "Delivery details"
+                    let vc = CodeVerificationViewController()
+                    vc.data = self.data
                     self.navigationController?.pushViewController(vc, animated: true)
-                    
-                    
-//                    let sceneDelegate = self.view.window?.windowScene?.delegate as! SceneDelegate
-//                    self.nextButton.hideLoading()
-//                    sceneDelegate.observeAuthorisedState()
                 }
             }
         }

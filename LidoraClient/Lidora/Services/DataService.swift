@@ -7,6 +7,7 @@
 
 
 import Stripe
+import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 
@@ -57,8 +58,14 @@ class DataService {
     }
     
     // UPDATE USER LOCATION
-    func updateUserLocation(line1: String, postalCode: String, state: String) {
-        
+    func updateUserLocation(line1: String, postalCode: String, city: String, state: String, complete: @escaping (Bool?, Error?) -> Void) {
+        self.RefCurrentUser.updateData(["line1": line1, "postal_code": postalCode, "city": city, "state": state]) { (error) in
+            if let error = error {
+                complete(false, error)
+            } else {
+                complete(true, nil)
+            }
+        }
     }
     
     // FETCH CURRENT USER
@@ -128,7 +135,6 @@ class DataService {
     }
     
     // UPDATE PAYMENT METHOD
-    
     func updatePaymentMethod(cardId: String, name: String?, month: UInt, year: UInt, complete: @escaping (Bool, Error?) -> Void) {
         RefPaymentsMethods.document(cardId).updateData(["month": month, "year": year]) { (error) in
             if let error = error {
@@ -232,7 +238,7 @@ class DataService {
     
     // ADD ITEM TO ORDER
     func addItemToOrder(orderId: String, chef: Chef, item: Menu, quantity: Int, total: Double, complete: @escaping (Bool?, Error?) -> Void) {
-        guard let providerId = chef.id, let name = item.name, let description = item.description, let imageURL = item.imageURL else { return }
+        guard let providerId = chef.id, let name = item.name, let description = item.description, let providerImageURL = chef.imageURL, let imageURL = item.imageURL else { return }
         let ref = self.RefCurrentUser.collection("orders").document(orderId)
         let itemRef = ref.collection("items").document(item.id)
         Firestore.firestore().runTransaction({ (transaction, errorPointer) -> Any? in
@@ -266,8 +272,9 @@ class DataService {
                 let stripeFee = service.stripeFee
                 let serviceFee = service.serviceFee
                 let total = service.total
+                let createdDate = CachedDateFormattingHelper.shared.orderDate()
                 
-                transaction.setData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity, "provider_id": chef.id!, "provider_name": chef.firstName!], forDocument: ref)
+                transaction.setData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity, "provider_id": chef.id!, "provider_name": chef.firstName!, "provider_imageURL": providerImageURL, "created": createdDate], forDocument: ref)
             }
             
             if itemDocument.exists {
@@ -346,14 +353,6 @@ class DataService {
                     complete(false, error)
                 } else {
                     complete(true, nil)
-                    
-                    //                    self.clearOrder(orderId: orderId) { (success, error) in
-                    //                        if !success! {
-                    //                            complete(false, error)
-                    //                        } else {
-                    //                            complete(true, nil)
-                    //                        }
-                    //                    }
                 }
             }
         }

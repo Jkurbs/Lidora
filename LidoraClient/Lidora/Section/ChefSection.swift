@@ -31,7 +31,7 @@ class ChefSection: ListSectionController {
     }
 
     override func numberOfItems() -> Int {
-        3
+        2
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
@@ -39,13 +39,10 @@ class ChefSection: ListSectionController {
             guard let imageCell = collectionContext?.dequeueReusableCell(of: ImageCell.self, for: self, at: index) as? ImageCell else { fatalError() }
             imageCell.imageURL = chef?.imageURL
             return imageCell
-        } else if index == 1 {
+        } else {
             guard let titleCell = collectionContext?.dequeueReusableCell(of: TitleCell.self, for: self, at: index) as? TitleCell else { fatalError() }
             titleCell.chef = chef
             return titleCell
-        } else {
-            guard let infoCell = collectionContext?.dequeueReusableCell(of: InfoCell.self, for: self, at: index) as? InfoCell else { fatalError() }
-            return infoCell
         }
     }
     

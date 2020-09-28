@@ -17,7 +17,11 @@ class AuthViewController: UIViewController {
     
     var label = UILabel()
     var descriptionLabel = UILabel()
+    
+    var stackView: UIStackView!
+    
     var detailField = FieldRect()
+    var phoneTextField = FieldRect()
     var passwordField = FieldRect()
     var nextButton = LoadingButton()
     
@@ -50,19 +54,25 @@ class AuthViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(descriptionLabel)
-        descriptionLabel.font = UIFont.systemFont(ofSize: 16)
+        descriptionLabel.font = UIFont.systemFont(ofSize: 17)
         descriptionLabel.textColor = .lightGray
         descriptionLabel.sizeToFit()
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         detailField.keyboardType = .emailAddress
         detailField.autocorrectionType = .no
         detailField.autocapitalizationType = .none
-        detailField.backgroundColor = .systemGray6
-        detailField.placeholder = "email address"
+        detailField.placeholder = "Email address"
         detailField.translatesAutoresizingMaskIntoConstraints = false
         detailField.setBorder()
-        view.addSubview(detailField)
+        
+        phoneTextField.keyboardType = .emailAddress
+        phoneTextField.autocorrectionType = .no
+        phoneTextField.autocapitalizationType = .none
+        phoneTextField.keyboardType = .phonePad
+        phoneTextField.placeholder = "Phone number"
+        phoneTextField.translatesAutoresizingMaskIntoConstraints = false
+        phoneTextField.setBorder()
         
         passwordField.isSecureTextEntry = true
         passwordField.backgroundColor = .systemGray6
@@ -70,7 +80,13 @@ class AuthViewController: UIViewController {
         passwordField.textContentType = .password
         passwordField.translatesAutoresizingMaskIntoConstraints = false
         passwordField.setBorder()
-        view.addSubview(passwordField)
+
+        stackView = UIStackView(arrangedSubviews: [detailField, phoneTextField, passwordField])
+        stackView.distribution = .fillEqually
+        stackView.spacing = 10
+        stackView.axis = .vertical
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stackView)
         
         nextButton.setTitle("Log In", for: .normal)
         nextButton.addTarget(self, action: #selector(self.nextStep), for: .touchUpInside)
@@ -85,22 +101,16 @@ class AuthViewController: UIViewController {
             label.topAnchor.constraint(equalTo: view.topAnchor, constant: 80.0),
             label.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -56.0),
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-        
+            
             descriptionLabel.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 8.0),
             descriptionLabel.leftAnchor.constraint(equalTo: label.leftAnchor),
-            descriptionLabel.rightAnchor.constraint(equalTo: label.rightAnchor, constant: -16.0),
-            descriptionLabel.heightAnchor.constraint(equalToConstant: 32.0),
         
-            detailField.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 40.0),
-            detailField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            detailField.widthAnchor.constraint(equalTo: label.widthAnchor),
-            detailField.heightAnchor.constraint(equalToConstant: 46.0),
+            stackView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16.0),
+            stackView.leftAnchor.constraint(equalTo: label.leftAnchor),
+            stackView.rightAnchor.constraint(equalTo: label.rightAnchor, constant: -16.0),
             
-            passwordField.topAnchor.constraint(equalTo: detailField.bottomAnchor, constant: 8.0),
-            passwordField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            passwordField.widthAnchor.constraint(equalTo: label.widthAnchor),
-            passwordField.heightAnchor.constraint(equalToConstant: 46.0),
-            
+            detailField.heightAnchor.constraint(equalToConstant: 50.0),
+
             nextButton.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 16.0),
             nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             nextButton.widthAnchor.constraint(equalTo: label.widthAnchor),
@@ -113,6 +123,7 @@ class AuthViewController: UIViewController {
             self.label.text = "Welcome to Lidora"
             self.descriptionLabel.text = "Log back into your account"
             self.nextButton.setTitle("Log In", for: .normal)
+            self.phoneTextField.removeFromSuperview()
         } else {
             self.label.text = "Welcome to Lidora"
             self.descriptionLabel.text = "Create an account"
@@ -145,9 +156,10 @@ class AuthViewController: UIViewController {
     }
     
     func registerNext() {
-        if let email = self.detailField.text, let pwd = self.passwordField.text {
+        if let email = self.detailField.text, let phone = self.phoneTextField.text, let pwd = self.passwordField.text {
             let vc = UsernameViewController()
             vc.data.append(email)
+            vc.data.append(phone)
             vc.data.append(pwd)
             navigationController?.pushViewController(vc, animated: true)
         }

@@ -49,6 +49,12 @@ class CachedDateFormattingHelper {
         let formattedDate = dateFormatter.string(from: Date())
         return formattedDate
     }
+    
+    func orderDate() -> String {
+        let dateFormatter = cachedDateFormatter(withFormat: "MMM dd, HH:mm")
+        let formattedDate = dateFormatter.string(from: Date())
+        return formattedDate
+    }
 }
 
 extension DateFormatter: DateFormatterType { }

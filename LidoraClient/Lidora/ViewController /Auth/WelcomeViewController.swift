@@ -12,6 +12,8 @@ import Foundation
 
 class WelcomeViewController: UIViewController {
     
+    var locationService = LocationService()
+
     var label = UILabel()
     var descriptionLabel = UILabel()
     let signUpButton = LoadingButton()
@@ -30,6 +32,7 @@ class WelcomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        locationService.requestLocation()
     }
     
     override func viewWillAppear(_ animated: Bool) {

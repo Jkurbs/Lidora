@@ -22,6 +22,8 @@ class CardViewController: UIViewController {
     let overView = OverView() 
     var proceedButton = LoadingButton()
     
+    var titleViewLabel = UILabel()
+    
     var user: User?
     var chef: Chef?
     
@@ -36,7 +38,7 @@ class CardViewController: UIViewController {
         didSet {
             switch cardState {
             case .empty:
-                self.title = "View Bag"
+                self.titleViewLabel.text = "View Bag"
                 emptyView.isHidden = false
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
@@ -44,7 +46,7 @@ class CardViewController: UIViewController {
                 emptyView.isHidden = true
                 overView.isHidden = true
             case .overview:
-                self.title = nil
+                self.titleViewLabel.text = nil
                 collectionView.isHidden = true
                 emptyView.isHidden = true
                 overView.isHidden = false
@@ -75,7 +77,6 @@ class CardViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.title = "View Bag"
         fetchOrder()
         fetchPrimaryCard()
     }
@@ -88,13 +89,19 @@ class CardViewController: UIViewController {
     // MARK: - Functions
     
     func setupViews() {
+        view.backgroundColor = UIColor.white
+
         navigationController?.view.layer.cornerRadius = 15
-        navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-        self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.tintColor = .systemGreen
         
-        view.backgroundColor = UIColor.white
+        titleViewLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        titleViewLabel.center.x = view.center.x
+        titleViewLabel.textAlignment = .center
+        titleViewLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        titleViewLabel.isUserInteractionEnabled = true
+        titleViewLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCardButton)))
+        titleViewLabel.text = "View Bag"
+        navigationItem.titleView = titleViewLabel
         
         cardState = .none
         
@@ -150,7 +157,7 @@ class CardViewController: UIViewController {
             if !success! {
                 self.cardState = .none
             } else {
-                self.title = "View Bag - \(order!.quantity!)"
+                self.titleViewLabel.text = "View Bag - \(order!.quantity!)"
                 self.cardState = .notEmpty
                 self.orderDetails.append(order!.providerName)
                 self.order.append(order!)
@@ -200,7 +207,6 @@ class CardViewController: UIViewController {
     }
     
     @objc func handleCardButton() {
-        self.collectionView.isHidden = false
         self.curtainController?.moveCurtain(to: .max, animated: true)
     }
     
@@ -249,7 +255,7 @@ extension CardViewController: CurtainDelegate {
             case .min:
                 self.navigationItem.leftBarButtonItem = nil
                 let quantity = self.order.first?.quantity
-                self.title = "View Bag - \(quantity ?? 0)"
+                self.titleViewLabel.text = "View Bag - \(quantity ?? 0)"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
@@ -258,6 +264,7 @@ extension CardViewController: CurtainDelegate {
                 collectionView.isHidden = false
                 proceedButton.isHidden = false
             case .max:
+                self.navigationItem.leftBarButtonItem = cancelButton
                 collectionView.isHidden = false
                 proceedButton.isHidden = false
             default:
@@ -267,7 +274,7 @@ extension CardViewController: CurtainDelegate {
             switch heightState {
             case .min:
                 self.navigationItem.leftBarButtonItem = nil
-                self.title = "View Bag"
+                self.titleViewLabel.text = "View Bag"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
                 proceedButton.isHidden = true
@@ -306,7 +313,7 @@ extension CardViewController: ListAdapterDataSource {
         if object is String {
             return OrderInfoSection() 
         } else if object is Menu {
-            return OrderSection()
+            return OrderMenuSection()
         } else if object is Card {
             return CardSection()
         } else {

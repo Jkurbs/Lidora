@@ -73,7 +73,9 @@ class SettingsViewController: UIViewController {
 
           do {
               try firebaseAuth.signOut()
-              let navigation = UINavigationController(rootViewController: AuthViewController())
+              let vc = AuthViewController()
+              vc.authChoice = .login
+              let navigation = UINavigationController(rootViewController: vc)
               navigation.modalPresentationStyle = .fullScreen
               self.navigationController?.present(navigation, animated: true, completion: nil)
           } catch let error as NSError {

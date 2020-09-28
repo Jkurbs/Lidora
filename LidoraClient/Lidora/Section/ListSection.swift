@@ -27,7 +27,7 @@ class ListSection: ListSectionController {
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
-        guard let cell = collectionContext?.dequeueReusableCell(of: OrderCell.self, for: self, at: index) as? OrderCell else { fatalError() }
+        guard let cell = collectionContext?.dequeueReusableCell(of: OrderMenuCell.self, for: self, at: index) as? OrderMenuCell else { fatalError() }
 //        cell.order = order
         return cell
     }

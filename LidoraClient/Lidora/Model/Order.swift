@@ -13,6 +13,7 @@ class Order {
     var id: String!
     var providerId: String!
     var providerName: String!
+    var providerImageURL: String!
     var items: [Menu]?
     var quantity: Int!
     var subtotal: Double!
@@ -34,6 +35,7 @@ class Order {
         self.id = key
         self.providerId = data["provider_id"] as? String
         self.providerName = data["provider_name"] as? String
+        self.providerImageURL = data["provider_imageURL"] as? String
         self.items = data["menu"] as? [Menu]
         self.quantity = data["quantity"] as? Int
         self.subtotal = data["subtotal"] as? Double
