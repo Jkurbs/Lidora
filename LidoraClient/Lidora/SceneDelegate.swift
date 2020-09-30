@@ -61,7 +61,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     }
                 }
             }
-            self.setupRootViewController(viewController: WelcomeViewController())
+            //self.setupRootViewController(viewController: WelcomeViewController())
             Auth.auth().removeStateDidChangeListener(self.handle!)
         }
     }

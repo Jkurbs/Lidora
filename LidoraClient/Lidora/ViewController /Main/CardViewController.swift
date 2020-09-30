@@ -212,7 +212,10 @@ class CardViewController: UIViewController {
     
     @objc func placeOrder() {
         self.proceedButton.showLoading()
-        guard let order = self.order.first, let card = self.card.first else { return }
+        guard let order = self.order.first, let card = self.card.first else {
+            addCardAlert()
+            return
+        }
         DataService.shared.placeOrder(order: order, card: card) { (success, error) in
             if let _ = error {
                 self.proceedButton.hideLoading()
@@ -227,6 +230,17 @@ class CardViewController: UIViewController {
     
     @objc func cancel() {
         self.curtainController?.moveCurtain(to: .min, animated: true)
+    }
+    
+    @objc func addCardAlert() {
+        let alert = UIAlertController(title: "Add Card", message: "Add a card before placing your order.", preferredStyle: .alert)
+        let addCard = UIAlertAction(title: "Add a Card", style: .default) { (action) in
+            
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alert.addAction(addCard)
+        alert.addAction(cancel)
+        self.present(alert, animated: true, completion: nil)
     }
 }
 

@@ -9,16 +9,15 @@ import UIKit
 
 class ChefCell: UICollectionViewCell {
     
-    
     var view = UIView()
-    var imageView1 = UIImageView()
+    var thumbnailImageView = UIImageView()
+    var likeButton = UIButton()
     
     var stackView1 = UIStackView()
     var stackView2 = UIStackView()
     var stackView3 = UIStackView()
     var stackView4 = UIStackView()
 
-    
     var nameLabel = UILabel()
     var imageView2 = UIImageView()
     
@@ -39,6 +38,9 @@ class ChefCell: UICollectionViewCell {
     private var shadowLayer: CAShapeLayer!
     private var cornerRadius: CGFloat = 10.0
     private var fillColor: UIColor = .white
+    
+    let weightConfiguration = UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)
+
 
     
     override init(frame: CGRect) {
@@ -49,24 +51,25 @@ class ChefCell: UICollectionViewCell {
     private func setupViews() {
         
         self.layer.cornerRadius = cornerRadius
-//        backgroundColor = UIColor.tertiarySystemGroupedBackground
-        
-        
-        
-        
         view.translatesAutoresizingMaskIntoConstraints = false
         view.clipsToBounds = true
         view.backgroundColor = .white
-        
         addSubview(view)
         
-        imageView1 = UIImageView(image: UIImage(named:  "food3"))
-        imageView1.contentMode = .scaleAspectFill
-        imageView1.clipsToBounds = true
-        imageView1.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(imageView1)
+        thumbnailImageView = UIImageView(image: UIImage(named:  "food3"))
+        thumbnailImageView.contentMode = .scaleAspectFill
+        thumbnailImageView.clipsToBounds = true
+        thumbnailImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(thumbnailImageView)
         
-        
+        let originalHeartImage = UIImage(systemName: "heart", withConfiguration: self.weightConfiguration)
+        let heartImage = originalHeartImage?.withTintColor(.white, renderingMode: .alwaysOriginal)
+        self.likeButton.setImage(heartImage, for: .normal)
+
+        likeButton.translatesAutoresizingMaskIntoConstraints = false
+        likeButton.addTarget(self, action: #selector(likeChef), for: .touchUpInside)
+        view.addSubview(likeButton)
+
         let originalTimerImage = UIImage(systemName: "timer")
         let timerImage = originalTimerImage?.withTintColor(.lightGray, renderingMode: .alwaysOriginal)
         
@@ -173,9 +176,14 @@ class ChefCell: UICollectionViewCell {
             view.bottomAnchor.constraint(equalTo: bottomAnchor),
             view.heightAnchor.constraint(equalTo: heightAnchor),
 
-            imageView1.topAnchor.constraint(equalTo: topAnchor),
-            imageView1.widthAnchor.constraint(equalToConstant: frame.size.width),
-            imageView1.heightAnchor.constraint(equalToConstant: frame.size.height/2),
+            thumbnailImageView.topAnchor.constraint(equalTo: topAnchor),
+            thumbnailImageView.widthAnchor.constraint(equalToConstant: frame.size.width),
+            thumbnailImageView.heightAnchor.constraint(equalToConstant: frame.size.height/2),
+            
+            likeButton.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            likeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
+            likeButton.widthAnchor.constraint(equalToConstant: 30),
+            likeButton.heightAnchor.constraint(equalToConstant: 30),
             
             imageView2.widthAnchor.constraint(equalToConstant: 30),
             imageView2.heightAnchor.constraint(equalToConstant: 30),
@@ -189,7 +197,7 @@ class ChefCell: UICollectionViewCell {
             imageView5.widthAnchor.constraint(equalToConstant: 20),
             imageView5.heightAnchor.constraint(equalToConstant: 20),
 
-            stackView1.topAnchor.constraint(equalTo: imageView1.bottomAnchor, constant: 16.0),
+            stackView1.topAnchor.constraint(equalTo: thumbnailImageView.bottomAnchor, constant: 16.0),
             stackView1.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
 
             stackView2.topAnchor.constraint(equalTo: stackView1.bottomAnchor, constant: 8.0),
@@ -201,11 +209,7 @@ class ChefCell: UICollectionViewCell {
             stackView4.topAnchor.constraint(equalTo: stackView3.bottomAnchor, constant: 8.0),
             stackView4.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
             stackView4.rightAnchor.constraint(equalTo: rightAnchor, constant: -16.0),
-
-
         ])
-        
-        print("HEIGHT: ", self.frame.size.height)
     }
 
     override func layoutSubviews() {
@@ -236,7 +240,33 @@ class ChefCell: UICollectionViewCell {
     
     var chef: Chef? {
         didSet {
-            print("CHEF SETUP")
+            updateLike()
+        }
+    }
+    
+    func updateLike() {
+        guard let id = chef?.id else { return }
+        DataService.shared.getLikes(providerId: id) { (success) in
+            if success! {
+                let originalHeartImage = UIImage(systemName: "heart.fill", withConfiguration: self.weightConfiguration)
+                let heartImage = originalHeartImage?.withTintColor(.white, renderingMode: .alwaysOriginal)
+                self.likeButton.setImage(heartImage, for: .normal)
+            }
+        }
+    }
+    
+    @objc private func likeChef() {
+        guard let id = chef?.id else { return }
+        DataService.shared.adjustLikes(providerId: id) { (success) in
+            if !success! {
+                let originalHeartImage = UIImage(systemName: "heart", withConfiguration: self.weightConfiguration)
+                let heartImage = originalHeartImage?.withTintColor(.white, renderingMode: .alwaysOriginal)
+                self.likeButton.setImage(heartImage, for: .normal)
+            } else {
+                let originalHeartImage = UIImage(systemName: "heart.fill", withConfiguration: self.weightConfiguration)
+                let heartImage = originalHeartImage?.withTintColor(.white, renderingMode: .alwaysOriginal)
+                self.likeButton.setImage(heartImage, for: .normal)
+            }
         }
     }
 }

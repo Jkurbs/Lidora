@@ -54,6 +54,10 @@ class OrdersViewController: UIViewController, ListAdapterDataSource {
             }
         }
     }
+    
+    func fetchOrderItems() {
+        
+    }
 }
 
 extension OrdersViewController {
@@ -62,7 +66,7 @@ extension OrdersViewController {
     }
     
     func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
-        return UpcomingOrdersSection()
+         return UpcomingOrdersSection()
     }
     
     func emptyView(for listAdapter: ListAdapter) -> UIView? {

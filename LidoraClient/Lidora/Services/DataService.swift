@@ -399,4 +399,32 @@ class DataService {
             }
         }
     }
+    
+    
+    func getLikes(providerId: String, complete: @escaping (Bool?) -> Void) {
+        let ref = self.RefCurrentUser.collection("likes")
+        ref.getDocuments { (snapshot, error) in
+            guard let snapshot = snapshot else { return }
+            for document in snapshot.documents {
+                if document.documentID == providerId {
+                    complete(true)
+                } else {
+                    complete(false)
+                }
+            }
+        }
+    }
+    
+    func adjustLikes(providerId: String, complete: @escaping (Bool?) -> Void) {
+        let ref = self.RefCurrentUser.collection("likes").document(providerId)
+        ref.getDocument { (snapshot, error) in
+            if let _ = snapshot?.data() {
+                ref.delete()
+                complete(false)
+            } else {
+                ref.setData(["id": providerId])
+                complete(true)
+            }
+        }
+    }
 }

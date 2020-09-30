@@ -18,7 +18,7 @@ class UpcomingOrdersSection: ListSectionController {
     }
     
     override func numberOfItems() -> Int {
-        1
+        2
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
