@@ -30,12 +30,15 @@ class PaymentViewController: UIViewController {
     var primaryCardId: String?
     
     var card: Card?
+    var delegate: CardDelegate?
+    var userFullName: String?
     
     lazy var nameField: FormTextField = {
         let textField = FormTextField()
         textField.inputType = .name
         textField.accessoryViewMode = .never
         textField.placeholder = "Name on card"
+        textField.text = userFullName ?? ""
         textField.borderStyle = .roundedRect
         textField.inputAccessoryView = buttonView
         return textField
@@ -100,7 +103,7 @@ class PaymentViewController: UIViewController {
         let button = LoadingButton(type: .custom)
         self.button = button
         button.enable()
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .systemGreen
         button.layer.cornerRadius = 5.0
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
         button.setTitle("Save", for: .normal)
@@ -195,7 +198,6 @@ class PaymentViewController: UIViewController {
             self.cardNumberField.removeFromSuperview()
             self.descriptionLabel.text = "*\(last4)"
             self.cardImageView.image = UIImage(named: card.brand.rawValue)
-            self.nameField.text = "Kerby Jean"
             self.cardExpirationDateField.text = "0\(month)/\(year % 100)"
         }
     }
@@ -234,16 +236,13 @@ class PaymentViewController: UIViewController {
             } else {
                 // Add New Card
                 guard cardNumberField.validate(), cardExpirationDateField.validate(), cvcField.validate() else { return }
-                
-                let cardParams = STPCardParams()
-                cardParams.number = cardNumberField.text
-                
+
                 DataService.shared.createStripePaymentMethod(primaryCard: self.primaryCardId ?? nil ,cardNumber: cardNumberField.text!, month: month, year: year, cvc: cvcField.text!) { (success, error) in
                     if !success {
                         self.button.hideLoading()
                         self.view.showMessage("An error occured while saving the card", type: .error)
                     } else {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                             self.button.hideLoading()
                             self.view.showMessage("Card successfully added", type: .success)
                         }
@@ -271,4 +270,3 @@ extension PaymentViewController: UITextFieldDelegate {
         return true
     }
 }
-

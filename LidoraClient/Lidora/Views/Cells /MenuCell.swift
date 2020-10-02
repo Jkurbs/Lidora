@@ -50,11 +50,11 @@ class MenuCell: UICollectionViewCell {
         
         addSubview(priceLabel)
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.font = UIFont.systemFont(ofSize: 15)
+        priceLabel.font = UIFont.systemFont(ofSize: 14)
         
         addSubview(descriptionLabel)
-        descriptionLabel.textColor = .lightGray
-        descriptionLabel.font = UIFont.systemFont(ofSize: 14)
+        descriptionLabel.textColor = .darkText
+        descriptionLabel.font = UIFont.systemFont(ofSize: 13)
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([

@@ -11,19 +11,14 @@ class UpcomingOrderCell: UICollectionViewCell {
     
     var imageView = UIImageView()
     var nameLabel = UILabel()
-    var descriptionLabel = UILabel()
-    var priceLabel = UILabel()
+    var dateLabel = UILabel()
+
     
     var order: Order? {
         didSet {
-            
-            print("ORDER: ", order?.providerImageURL)
-            
             imageView.sd_setImage(with: URL(string: order!.providerImageURL))
             nameLabel.text = order?.providerName
-//            descriptionLabel.text = menu?.description
-//            priceLabel.text =  "$\(menu?.price ?? 0.0)"
-//            imageView.sd_setImage(with: URL(string: (menu?.imageURL)!), completed: nil)
+            dateLabel.text = order?.createdDate
         }
     }
     
@@ -50,15 +45,16 @@ class UpcomingOrderCell: UICollectionViewCell {
         
         addSubview(nameLabel)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+        nameLabel.backgroundColor = UIColor(white: 0.3, alpha: 0.5)
+        nameLabel.textColor = .white
+        nameLabel.textAlignment = .center
         
-        addSubview(priceLabel)
-        priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.font = UIFont.systemFont(ofSize: 15)
-        
-        addSubview(descriptionLabel)
-        descriptionLabel.textColor = .lightGray
-        descriptionLabel.font = UIFont.systemFont(ofSize: 14)
-        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(dateLabel)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateLabel.textColor = .darkText
+        dateLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+
         
         NSLayoutConstraint.activate([
             
@@ -66,16 +62,15 @@ class UpcomingOrderCell: UICollectionViewCell {
             imageView.heightAnchor.constraint(equalToConstant: 100),
             imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
-//            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8.0),
-//            nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
-//            nameLabel.rightAnchor.constraint(equalTo: imageView.leftAnchor, constant: -16.0),
-//
-//            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8.0),
-//            descriptionLabel.leftAnchor.constraint(equalTo: nameLabel.leftAnchor),
-//            descriptionLabel.rightAnchor.constraint(equalTo: nameLabel.rightAnchor),
-//
-//            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8.0),
-//            priceLabel.leftAnchor.constraint(equalTo: descriptionLabel.leftAnchor)
+            nameLabel.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
+            nameLabel.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+            nameLabel.widthAnchor.constraint(equalTo: imageView.widthAnchor),
+            nameLabel.heightAnchor.constraint(equalTo: imageView.heightAnchor),
+
+            dateLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16.0) ,
+            dateLabel.widthAnchor.constraint(equalTo: widthAnchor),
+            dateLabel.heightAnchor.constraint(equalToConstant: 30),
+            dateLabel.leftAnchor.constraint(equalTo: imageView.leftAnchor),
         ])
     }
 }

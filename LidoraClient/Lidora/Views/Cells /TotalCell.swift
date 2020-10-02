@@ -66,25 +66,3 @@ class TotalCell: UICollectionViewCell {
         priceLabel.text = "$\(value ?? 0.0)"
     }
 }
-
-class ClearBagCell: UICollectionViewCell {
-    
-    var button = UIButton()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        addSubview(button)
-        button.setTitle("Clear bag", for: .normal)
-        button.setTitleColor(.systemRed, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14)
-        button.contentHorizontalAlignment = .center
-        button.frame = bounds
-    }
-
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-

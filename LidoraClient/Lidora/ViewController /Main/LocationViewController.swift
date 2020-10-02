@@ -8,6 +8,11 @@
 import UIKit
 import MapKit
 
+enum LocationType {
+    case register
+    case update
+}
+
 class LocationViewController: UIViewController {
     
     var tableView: UITableView!
@@ -15,6 +20,32 @@ class LocationViewController: UIViewController {
     var searchCompleter = MKLocalSearchCompleter()
     var searchResults = [MKLocalSearchCompletion]()
     var currentAddress: String?
+    var locationType = LocationType.update
+    
+    lazy var buttonView: UIView = {
+        let view = UIView()
+        view.frame =  CGRect(x: 0, y: 0, width: view.frame.size.width, height: 60)
+        view.backgroundColor = .white
+        view.layer.shadowColor = UIColor.darkGray.cgColor
+        view.layer.shadowRadius = 5.0
+        let button = LoadingButton(type: .custom)
+        button.enable()
+        button.backgroundColor = .systemGreen
+        button.layer.cornerRadius = 5.0
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        button.setTitle("Save", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(done), for: .touchUpInside)
+        view.addSubview(button)
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -60),
+            button.heightAnchor.constraint(equalTo: view.heightAnchor, constant: -20),
+            button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        ])
+        return view
+    }()
     
     var delegate: LocationDelegate?
     var doneButtonItem: UIBarButtonItem!
@@ -31,13 +62,7 @@ class LocationViewController: UIViewController {
     
     func setupViews() {
         view.backgroundColor = .white
-        
         searchCompleter.resultTypes = [.address]
-        
-        doneButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
-        doneButtonItem.isEnabled = false
-        navigationItem.rightBarButtonItem = doneButtonItem
-        
         searchCompleter.delegate = self
         
         searchBar.frame = CGRect(x: 0, y: 60, width: view.frame.width, height: 60)
@@ -47,6 +72,9 @@ class LocationViewController: UIViewController {
         searchBar.isTranslucent = false
         searchBar.backgroundImage = UIImage()
         searchBar.delegate = self
+        searchBar.inputAccessoryView = buttonView
+        searchBar.becomeFirstResponder()
+
         view.addSubview(searchBar)
         
         navigationController?.navigationBar.tintColor = .darkText
@@ -59,7 +87,14 @@ class LocationViewController: UIViewController {
     }
     
     @objc func done() {
-        
+        if locationType == .register {
+            self.title = "Delivery Location"
+            let sceneDelegate = self.view.window?.windowScene?.delegate as! SceneDelegate
+            sceneDelegate.observeAuthorisedState()
+        } else {
+            self.title = "Change Location"
+            self.navigationController?.dismiss(animated: true, completion: nil)
+        }
     }
     
     
@@ -105,18 +140,10 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
-//        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
-//        let originalImage = UIImage(systemName: "location")
-//        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-//        cell.imageView?.image = image
-//        if indexPath.section == 0 {
-//            cell.textLabel?.text = self.currentAddress
-//        } else {
-//            let searchResult = searchResults[indexPath.row]
-//            cell.textLabel?.text = searchResult.title
-//            cell.detailTextLabel?.text = searchResult.subtitle
-//        }
-        
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
+        let originalImage = UIImage(systemName: "location")
+        let image = originalImage?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        cell.imageView?.image = image
         let searchResult = searchResults[indexPath.row]
         cell.textLabel?.text = searchResult.title
         cell.detailTextLabel?.text = searchResult.subtitle
@@ -128,26 +155,21 @@ extension LocationViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.section == 0 {
-            
-        } else {
-            
-            let selectedResult = self.searchResults[indexPath.row]
-            let request = MKLocalSearch.Request()
-            request.naturalLanguageQuery = selectedResult.title
-            let search = MKLocalSearch(request: request)
-            search.start { (response, error) -> Void in
-                if response == nil{
-                    return
-                }
-                if let item = response?.mapItems.first {
-                    let placemark = item.placemark
-                    if let address = placemark.name, let postalCode = placemark.postalCode, let state = placemark.administrativeArea, let city = placemark.locality {
-                        DataService.shared.updateUserLocation(line1: address, postalCode: postalCode, city: city, state: state) { (success, error) in
-                            if !success! {
-                                print("Error: ", error)
-                            }
-                            self.doneButtonItem.isEnabled = true
+        let selectedResult = self.searchResults[indexPath.row]
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = selectedResult.title
+        let search = MKLocalSearch(request: request)
+        search.start { (response, error) -> Void in
+            if response == nil{
+                return
+            }
+            if let item = response?.mapItems.first {
+                let placemark = item.placemark
+                if let line1 = placemark.name, let postalCode = placemark.postalCode, let state = placemark.administrativeArea, let city = placemark.locality {
+                    self.delegate?.location(line1: line1, postalCode: postalCode, city: city, state: state)
+                    DataService.shared.updateUserLocation(line1: line1, postalCode: postalCode, city: city, state: state) { (success, error) in
+                        if !success! {
+                            print("Error: ", error)
                         }
                     }
                 }

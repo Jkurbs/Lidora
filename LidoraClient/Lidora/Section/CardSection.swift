@@ -14,7 +14,7 @@ class CardSection: ListSectionController {
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
-        if index == 1 || index == 4 {
+        if index == 1 {
             return CGSize(width: width, height: 60)
         } else {
             return CGSize(width: width, height: 30)
@@ -87,12 +87,10 @@ class TotalSection: ListSectionController {
             cell.updateViews(title: "Service Fee", value: order!.serviceFee)
             cell.separator.isHidden = true
         } else if index == 2 {
+            cell.updateViews(title: "Delivery Fee", value: order!.deliveryFee)
+        } else {
             cell.label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
             cell.updateViews(title: "Total", value: order?.total)
-        } else {
-            guard let cell = collectionContext?.dequeueReusableCell(of: ClearBagCell.self, for: self, at: index) as? ClearBagCell else {
-                fatalError()}
-            return cell
         }
         return cell
     }

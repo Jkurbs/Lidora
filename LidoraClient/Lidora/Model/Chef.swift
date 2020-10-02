@@ -19,7 +19,7 @@ class Chef {
     let ssnLast4: String!
     let ssn: String!
     let imageURL: String!
-    let thumbnailsURL: [String]!
+    let thumbnailsURL: String!
     let description: String!
     let ip: String!
     var menu: Menu!
@@ -27,14 +27,14 @@ class Chef {
     init(key: String, data: [String: Any]) {
         self.id = key
         self.firstName = data["first_name"] as? String
-        self.lastName = data["first_name"] as? String
+        self.lastName = data["last_name"] as? String
         self.email = data["email_address"] as? String
         self.phone = data["phone"] as? String
         self.dob = data["dob"] as? [Int]
         self.ssnLast4 = data["ssnLast4"] as? String
         self.ssn = data["ssn"] as? String
         self.imageURL = data["imageURL"] as? String
-        self.thumbnailsURL = data["thumbnailsURL"] as? [String]
+        self.thumbnailsURL = data["thumbnail_url"] as? String
         self.description = data["description"] as? String
         self.ip = data["ip"] as? String
      }

@@ -15,6 +15,10 @@ struct User {
     let email: String?
     let phoneNumber: String?
     let primaryCard: String?
+    let line1: String?
+    let state: String?
+    let city: String?
+    let postalCode: String?
     
     init(id: String, data: [String: Any]) {
         self.id = id
@@ -24,5 +28,9 @@ struct User {
         self.email = data["email"] as? String
         self.phoneNumber = data["phone"] as? String
         self.primaryCard = data["primary_card"] as? String
+        self.line1 = data["line1"] as? String
+        self.state = data["state"] as? String
+        self.city = data["city"] as? String
+        self.postalCode = data["postal_code"] as? String
     }
 }

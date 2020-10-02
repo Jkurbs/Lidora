@@ -15,6 +15,8 @@ class  ChangePasswordViewController: UITableViewController {
     
     var saveButton: UIBarButtonItem!
     
+    // MARK: - View Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -35,13 +37,13 @@ class  ChangePasswordViewController: UITableViewController {
     @objc func save() {
         guard let currentPass = tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? TextFieldCell, let repeatPass = tableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? TextFieldCell, let newPass = tableView.cellForRow(at: IndexPath(row: 1, section: 0)) as? TextFieldCell, currentPass != repeatPass else { return }
         
-//        Auth.auth().currentUser?.updatePassword(to: newPass.textField.text!, completion: { error in
-//            if let err = error {
-//                self.showMessage(err.localizedDescription, type: .error)
-//            } else {
-//                 self.showMessage("Password successfully updated", type: .error)
-//            }
-//        })
+        Auth.auth().currentUser?.updatePassword(to: newPass.textField.text!, completion: { error in
+            if let err = error {
+                self.showMessage(err.localizedDescription, type: .error)
+            } else {
+                self.showMessage("Password successfully updated", type: .error)
+            }
+        })
     }
 }
 

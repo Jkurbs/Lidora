@@ -35,13 +35,14 @@ public func percentage(value:Double, percentageVal:Double, additional: Double?)-
 
 extension Double {
 
-    func serviceFee() -> (subtotal: Double, stripeFee: Double, platformFee: Double, serviceFee: Double, total: Double) {
+    func serviceFee() -> (subtotal: Double, stripeFee: Double, platformFee: Double, serviceFee: Double, deliveryFee: Double, total: Double) {
         let subtotal = roundNumber(self)
         let stripeFee = roundNumber(percentage(value: subtotal, percentageVal: 2.9, additional: 0.30))
         let platformFee = roundNumber(percentage(value: subtotal, percentageVal: 10, additional: nil))
         let serviceFee = roundNumber(stripeFee + platformFee)
-        let total = roundNumber(subtotal + stripeFee + platformFee)
-        return (subtotal: subtotal, stripeFee: stripeFee, platformFee: platformFee, serviceFee: serviceFee, total: total)
+        let deliveryFee = 0.30
+        let total = roundNumber(subtotal + stripeFee + platformFee + deliveryFee)
+        return (subtotal: subtotal, stripeFee: stripeFee, platformFee: platformFee, serviceFee: serviceFee, deliveryFee: deliveryFee, total: total)
     }
 }
 

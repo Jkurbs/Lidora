@@ -14,12 +14,22 @@ class UpcomingOrdersSection: ListSectionController {
     
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
-        return CGSize(width: width, height: 100)
+        return CGSize(width: width, height: 150)
     }
     
     override func numberOfItems() -> Int {
-        2
+        1
     }
+    
+    
+    
+    func loadOrderItems() {
+        
+    }
+    
+    
+    
+    
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
         guard let cell = collectionContext?.dequeueReusableCell(of: UpcomingOrderCell.self, for: self, at: index) as? UpcomingOrderCell else { fatalError() }

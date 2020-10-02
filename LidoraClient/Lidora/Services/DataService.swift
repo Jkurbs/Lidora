@@ -69,7 +69,7 @@ class DataService {
     }
     
     // FETCH CURRENT USER
-    func fetchUser(userId: String, complete: @escaping (User?, Error?) -> Void) {
+    func fetchUser(userId: String? = nil, complete: @escaping (User?, Error?) -> Void) {
         self.RefCurrentUser.getDocument { (snapshot, error) in
             if let error = error {
                 print("Error fetch user details: ", error)
@@ -203,7 +203,7 @@ class DataService {
     
     
     // FETCH CHEFS
-    func fetchChefs(id: String, complete: @escaping (Chef?, Error?) -> Void) {
+    func fetchChefs(complete: @escaping (Chef?, Error?) -> Void) {
         self.RefChefs.getDocuments(completion: { (snapshot, error) in
             if let error = error {
                 complete(nil, error)
@@ -271,10 +271,10 @@ class DataService {
                 let platformFee = service.platformFee
                 let stripeFee = service.stripeFee
                 let serviceFee = service.serviceFee
+                let deliveryFee = service.deliveryFee
                 let total = service.total
-                let createdDate = CachedDateFormattingHelper.shared.orderDate()
                 
-                transaction.setData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "total": total, "quantity":  quantity, "provider_id": chef.id!, "provider_name": chef.firstName!, "provider_imageURL": providerImageURL, "created": createdDate], forDocument: ref)
+                transaction.setData(["subtotal": subtotal, "platform_fee": platformFee, "stripe_fee": stripeFee, "service_fee": serviceFee, "delivery_fee": deliveryFee, "total": total, "quantity":  quantity, "provider_id": chef.id!, "provider_name": chef.firstName!, "provider_imageURL": providerImageURL], forDocument: ref)
             }
             
             if itemDocument.exists {
@@ -330,11 +330,16 @@ class DataService {
     // CLEAR ORDER
     func clearOrder(orderId: String, complete: @escaping (Bool?, Error?) -> Void) {
         let ref = self.RefOrders.document(orderId)
-        ref.delete { (error) in
-            if let error = error {
-                complete(false, error)
-            } else {
-                complete(true, nil)
+        ref.collection("items").getDocuments { (snapshot, error) in
+            for document in snapshot!.documents {
+                document.reference.delete()
+            }
+            ref.delete { (error) in
+                if let error = error {
+                    complete(false, error)
+                } else {
+                    complete(true, nil)
+                }
             }
         }
     }
@@ -368,12 +373,15 @@ class DataService {
         cardParams.expYear = year
         cardParams.cvc = cvv
         
+        let createdDate = CachedDateFormattingHelper.shared.orderDate()
+
+        
         STPAPIClient.shared().createToken(withCard: cardParams) { (token: STPToken?, error: Error?) in
             guard let token = token, error == nil else {
                 complete(false, nil, error)
                 return
             }
-            self.RefPayments.document(token.tokenId).setData(["subtotal": subtotal, "total": total, "currency" : "usd", "payment_method": token.tokenId, "destination": destination, "provider_name": destinationName], merge: true) { (error) in
+            self.RefPayments.document(token.tokenId).setData(["subtotal": subtotal, "total": total, "currency" : "usd", "payment_method": token.tokenId, "destination": destination, "provider_name": destinationName, "created": createdDate], merge: true) { (error) in
                 if let error = error {
                     complete(false, nil, error)
                 } else {
@@ -383,6 +391,22 @@ class DataService {
         }
     }
     
+    
+    // FETCH PAST ORDERS
+    func fetchPastOrders(complete: @escaping (Order?, Error?) -> Void) {
+        self.RefCurrentUser.collection("past_orders").getDocuments { (snapshot, error) in
+            if let error = error {
+                complete(nil, error)
+            } else {
+                for document in snapshot!.documents {
+                    let id = document.documentID
+                    let data = document.data()
+                    let order = Order(key: id, data: data)
+                    complete(order, nil)
+                }
+            }
+        }
+    }
     
     // FETCH UPCOMING ORDERS
     func fetchUpcomingOrders(complete: @escaping (Order?, Error?) -> Void) {
@@ -399,6 +423,24 @@ class DataService {
             }
         }
     }
+    
+    
+    // FETCH UPCOMING ORDERS
+    func fetchOrderItems(complete: @escaping (Order?, Error?) -> Void) {
+        self.RefCurrentUser.collection("upcoming_orders").getDocuments { (snapshot, error) in
+            if let error = error {
+                complete(nil, error)
+            } else {
+                for document in snapshot!.documents {
+                    let id = document.documentID
+                    let data = document.data()
+                    let order = Order(key: id, data: data)
+                    complete(order, nil)
+                }
+            }
+        }
+    }
+    
     
     
     func getLikes(providerId: String, complete: @escaping (Bool?) -> Void) {

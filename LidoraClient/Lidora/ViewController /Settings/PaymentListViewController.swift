@@ -30,6 +30,7 @@ class PaymentListViewController: UIViewController {
     var cards = [Card]()
     var delegate: CardDelegate?
     var selectedIndex: IndexPath?
+    var user: User?
     
     // MARK: - View Lifecycle
     
@@ -87,6 +88,7 @@ class PaymentListViewController: UIViewController {
     
     @objc func goToAddNewPaymentVC() {
         let vc = PaymentViewController()
+        vc.userFullName = "\(user?.firstName ?? "") \(user?.lastName ?? "")"
         if let primaryCardId = self.cards.filter({$0.primary == true}).first?.id {
             vc.primaryCardId = primaryCardId
             self.navigationItem.rightBarButtonItem = nil
@@ -127,6 +129,7 @@ extension PaymentListViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+        cell.tintColor = .systemGreen
         cell.selectionStyle = .none
         
         let card = self.cards[indexPath.row]

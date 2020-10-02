@@ -25,11 +25,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func observeAuthorisedState() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
+            print("ADD AUTH LISTENER")
             guard let self = self else { return }
             if user == nil {
+                print("NO USER")
                 self.setupRootViewController(viewController: WelcomeViewController())
-            } else {
+            } else if user?.uid != nil {
                 // Fetch user
+                
+                print("USER: ", user?.uid)
                 guard let user = user else { return }
                 DataService.shared.fetchUser(userId: user.uid) { (user, error) in
                     if let error = error {
@@ -60,8 +64,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         self.window?.makeKeyAndVisible()
                     }
                 }
+            } else {
+                print("NOT USER")
+                self.setupRootViewController(viewController: WelcomeViewController())
             }
-            //self.setupRootViewController(viewController: WelcomeViewController())
             Auth.auth().removeStateDidChangeListener(self.handle!)
         }
     }

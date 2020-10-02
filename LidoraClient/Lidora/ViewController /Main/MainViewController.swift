@@ -6,13 +6,19 @@
 //
 
 import UIKit
-import CoreLocation
+import IGListKit
 
 class MainViewController: UIViewController {
     
     var locationView = LocationView()
     var locationService: LocationService?
+    
+    lazy var adapter: ListAdapter = {
+        return ListAdapter(updater: ListAdapterUpdater(), viewController: self)
+    }()
+    
     var collectionView: UICollectionView!
+    
     
     lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -27,22 +33,9 @@ class MainViewController: UIViewController {
     var chefs = [Chef]()
     var user: User? 
     
-    enum Section: Int, Hashable, CaseIterable, CustomStringConvertible {
-        case chefs
-        var description: String {
-            switch self {
-                case .chefs: return "chefs"
-            }
-        }
-    }
-    
-    var dataSource: UICollectionViewDiffableDataSource<Section, Chef>!
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-        configureHierarchy()
-        configureDataSource()
         fetchChefs()
     }
     
@@ -54,16 +47,23 @@ class MainViewController: UIViewController {
         self.curtainController?.moveCurtain(to: .min, animated: false)
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
+    
+    
     func fetchChefs() {
         self.chefs.removeAll()
-        DataService.shared.fetchChefs(id: "cAim5UCNHnXPAvvK0sUa") { (chef, error) in
+        DataService.shared.fetchChefs() { (chef, error) in
             if let error = error {
                 print("Error: ", error)
             } else {
                 DispatchQueue.main.async {
                     self.chefs.append(chef!)
-                    self.applyInitialSnapshots()
+                    self.adapter.performUpdates(animated: true)
                     self.indicator.stopAnimating()
+                    
                 }
             }
         }
@@ -78,38 +78,22 @@ class MainViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .darkText
         navigationItem.rightBarButtonItems = [menuBarButton, orderButton]
         locationView.label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(goToLocationVC)))
-    }
-    
-    @objc func goToOrders() {
-        self.curtainController?.moveCurtain(to: .hide, animated: true)
-        let vc = OrdersViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    @objc func goToSettings() {
-        self.curtainController?.moveCurtain(to: .hide, animated: true)
-        let vc = SettingsViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    @objc func goToLocationVC() {
-        let locationViewController = LocationViewController()
-        locationViewController.title = "Change location"
-        locationViewController.currentAddress = locationView.label.text
-        let navigationController = UINavigationController(rootViewController: locationViewController)
-        self.present(navigationController, animated: true, completion: nil)
-    }
-    
-    func configureHierarchy() {
-                
-        collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), collectionViewLayout: createLayout())
-        collectionView.delegate = self
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = UIColor.tertiarySystemBackground
-        
-        collectionView.register(ChefCell.self, forCellWithReuseIdentifier: "ChefCell")
+        collectionView.isScrollEnabled = true
+//        collectionView.scro
         collectionView.addSubview(indicator)
         view.addSubview(collectionView)
+        adapter.collectionView = collectionView
+        adapter.dataSource = self
+                
+        self.locationView.updateViews("\(user?.line1 ?? "") \(user?.postalCode ?? "")")
+
         view.addSubview(locationView)
         
         NSLayoutConstraint.activate([
@@ -122,73 +106,51 @@ class MainViewController: UIViewController {
         ])
     }
     
-    func createLayout() -> UICollectionViewLayout {
-        
-        let sectionProvider = { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-            
-//            guard let sectionKind = Section(rawValue: sectionIndex) else { return nil }
-            var section: NSCollectionLayoutSection
-
-            // orthogonal scrolling section of images
-            
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(0.9))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            item.contentInsets = NSDirectionalEdgeInsets(top: 40, leading: 5, bottom: 5, trailing: -50)
-            item.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: NSCollectionLayoutSpacing.fixed(0), top: NSCollectionLayoutSpacing.fixed(0), trailing: NSCollectionLayoutSpacing.fixed(0), bottom: NSCollectionLayoutSpacing.fixed(0))
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.9), heightDimension: .fractionalWidth(1.0))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-            section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 5
-            section.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 5)
-            section = NSCollectionLayoutSection(group: group)
-            section.orthogonalScrollingBehavior = .continuous
-
-            return section
-        }
-        return  UICollectionViewCompositionalLayout(sectionProvider: sectionProvider)
+    @objc func goToOrders() {
+        self.curtainController?.moveCurtain(to: .hide, animated: true)
+        let vc = OrdersViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
     
-    /// - Tag: ArtsDataSource
-    
-    func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Chef>(collectionView: collectionView) {
-            (collectionView, indexPath, item) -> UICollectionViewCell? in
-            guard let section = Section(rawValue: indexPath.section) else { fatalError() }
-            switch section {
-            case .chefs:
-                return collectionView.dequeueConfiguredReusableCell(using: self.configuredGridCell(), for: indexPath, item: item)
-            }
-        }
+    @objc func goToSettings() {
+        self.curtainController?.moveCurtain(to: .hide, animated: true)
+        let vc = SettingsViewController()
+        vc.user = user
+        navigationController?.pushViewController(vc, animated: true)
     }
     
-    /// - Tag: CellConfiguration
-    func configuredGridCell() -> UICollectionView.CellRegistration<ChefCell, Chef> {
-        return UICollectionView.CellRegistration<ChefCell, Chef> { (cell, indexPath, item) in
-            cell.chef = item
-        }
-    }
-    
-    
-    func applyInitialSnapshots() {
-        // Set the order for our sections
-        let sections = Section.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Chef>()
-        snapshot.appendSections(sections)
-        dataSource.apply(snapshot, animatingDifferences: false)
-        
-        // Image (orthogonal scroller)
-        var imageSnapshot = NSDiffableDataSourceSectionSnapshot<Chef>()
-        imageSnapshot.append(self.chefs)
-        dataSource.apply(imageSnapshot, to: .chefs, animatingDifferences: true)
+    @objc func goToLocationVC() {
+        let locationViewController = LocationViewController()
+        locationViewController.title = "Change Location"
+        locationViewController.delegate = self
+        locationViewController.locationType = .update
+        locationViewController.currentAddress = locationView.label.text
+        let navigationController = UINavigationController(rootViewController: locationViewController)
+        self.present(navigationController, animated: true, completion: nil)
     }
 }
 
 
-extension MainViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let chef = self.chefs[indexPath.row]
-        let menuViewController = MenuViewController()
-        menuViewController.chef.append(chef)
-        self.navigationController?.pushViewController(menuViewController, animated: true)
+// MARK: - LocationDelegate
+extension MainViewController: LocationDelegate {
+    
+    func location(line1: String, postalCode: String, city: String, state: String) {
+        self.locationView.updateViews("\(line1) \(postalCode)")
+    }
+}
+
+
+extension MainViewController: ListAdapterDataSource {
+    
+    func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
+        return chefs as [ListDiffable]
+    }
+    
+    func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
+        return ChefAroundSection()
+    }
+    
+    func emptyView(for listAdapter: ListAdapter) -> UIView? {
+        return nil
     }
 }

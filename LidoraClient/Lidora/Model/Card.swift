@@ -39,6 +39,16 @@ class Card {
     var year: UInt!
     var primary: Bool?
     
+    
+    init(cardNumber: String, cvc: String, last4: String, month: UInt, year: UInt, primary: Bool) {
+        self.cardNumber = cardNumber
+        self.cvc = cvc
+        self.last4 = last4
+        self.month = month
+        self.year = year
+        self.primary = primary
+    }
+    
     init(id: String, data: [String: Any]) {
         self.id = id
         

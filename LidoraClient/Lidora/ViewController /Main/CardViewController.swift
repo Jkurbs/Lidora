@@ -19,8 +19,8 @@ enum CardState: String, CaseIterable {
 class CardViewController: UIViewController {
     
     let emptyView = EmptyView()
-    let overView = OverView() 
-    var proceedButton = LoadingButton()
+    let overView = OverView()
+    var proceedView = ProceedView()
     
     var titleViewLabel = UILabel()
     
@@ -41,7 +41,7 @@ class CardViewController: UIViewController {
                 self.titleViewLabel.text = "View Bag"
                 emptyView.isHidden = false
                 collectionView.isHidden = true
-                proceedButton.isHidden = true
+                proceedView.isHidden = true
             case .notEmpty:
                 emptyView.isHidden = true
                 overView.isHidden = true
@@ -50,12 +50,12 @@ class CardViewController: UIViewController {
                 collectionView.isHidden = true
                 emptyView.isHidden = true
                 overView.isHidden = false
-                proceedButton.isHidden = true
+                proceedView.isHidden = true
             case .none:
                 collectionView.isHidden = true
                 emptyView.isHidden = true
                 overView.isHidden = true
-                proceedButton.isHidden = true
+                proceedView.isHidden = true
             }
         }
     }
@@ -77,8 +77,7 @@ class CardViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchOrder()
-        fetchPrimaryCard()
+        fetchData()
     }
     
     override func viewDidLoad() {
@@ -105,7 +104,7 @@ class CardViewController: UIViewController {
         
         cardState = .none
         
-        cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
+        cancelButton = UIBarButtonItem(title: "Dismiss", style: .done, target: self, action:  #selector(cancel))
         
         emptyView.isHidden = false
         overView.isHidden = true
@@ -121,29 +120,26 @@ class CardViewController: UIViewController {
         adapter.collectionView = collectionView
         adapter.dataSource = self
         
-        view.addSubview(proceedButton)
-        proceedButton.enable()
-        proceedButton.translatesAutoresizingMaskIntoConstraints = false
-        proceedButton.setTitle("Place Order", for: .normal)
-        proceedButton.backgroundColor = .systemGreen
-        proceedButton.addTarget(self, action: #selector(placeOrder), for: .touchUpInside)
+        view.addSubview(proceedView)
+        proceedView.clearButton.addTarget(self, action: #selector(clearOrder), for: .touchUpInside)
+        proceedView.proceedButton.addTarget(self, action: #selector(placeOrder), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
             emptyView.widthAnchor.constraint(equalTo: view.widthAnchor),
             emptyView.heightAnchor.constraint(equalTo: view.heightAnchor),
             
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
             collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100.0),
-
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -200.0),
             
             overView.widthAnchor.constraint(equalTo: view.widthAnchor),
             overView.heightAnchor.constraint(equalTo: view.heightAnchor),
-            proceedButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32.0),
-            proceedButton.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -32),
-            proceedButton.heightAnchor.constraint(equalToConstant: 60.0),
-            proceedButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            proceedView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            proceedView.heightAnchor.constraint(equalToConstant: 200.0),
+            proceedView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            proceedView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
         ])
         
         NotificationCenter.default.addObserver(self, selector: #selector(addToOrder(_:)), name: .addToBag, object: nil)
@@ -153,11 +149,14 @@ class CardViewController: UIViewController {
     
     func fetchOrder() {
         guard let orderId = user?.orderId else { return }
+        self.order.removeAll()
+        self.menus.removeAll()
         DataService.shared.fetchCurrentOrder(orderId: orderId) { (success, order, menu, error) in
             if !success! {
                 self.cardState = .none
             } else {
                 self.titleViewLabel.text = "View Bag - \(order!.quantity!)"
+                self.overView.order = order
                 self.cardState = .notEmpty
                 self.orderDetails.append(order!.providerName)
                 self.order.append(order!)
@@ -169,11 +168,25 @@ class CardViewController: UIViewController {
         }
     }
     
-    func clearOrder() {
-        
+    @objc func clearOrder() {
+        self.proceedView.clearButton.showLoading()
+        guard let orderId = self.order.first?.id else { return }
+        clearBagAlert(orderId: orderId)
+    }
+    
+    func fetchData() {
+        self.user = nil
+        DataService.shared.fetchUser() { (user, error) in
+            if let user = user {
+                self.user = user
+                self.fetchOrder()
+                self.fetchPrimaryCard()
+            }
+        }
     }
     
     func fetchPrimaryCard() {
+        self.card.removeAll()
         guard let primaryCardId = user?.primaryCard else { return }
         DataService.shared.fetchPrimaryPaymentMethod(cardId: primaryCardId) { (card, error) in
             if let error = error {
@@ -207,23 +220,27 @@ class CardViewController: UIViewController {
     }
     
     @objc func handleCardButton() {
+        self.fetchData()
         self.curtainController?.moveCurtain(to: .max, animated: true)
     }
     
     @objc func placeOrder() {
-        self.proceedButton.showLoading()
+        self.proceedView.proceedButton.showLoading()
         guard let order = self.order.first, let card = self.card.first else {
             addCardAlert()
             return
         }
         DataService.shared.placeOrder(order: order, card: card) { (success, error) in
             if let _ = error {
-                self.proceedButton.hideLoading()
+                self.proceedView.proceedButton.hideLoading()
             } else {
+                self.overView.order = nil
                 self.order.removeAll()
+                self.orderDetails.removeAll()
                 self.view.showMessage("Order placed", type: .success)
                 self.cardState = .empty
-                self.proceedButton.hideLoading()
+                self.proceedView.proceedButton.hideLoading()
+                self.adapter.performUpdates(animated: true)
             }
         }
     }
@@ -232,12 +249,41 @@ class CardViewController: UIViewController {
         self.curtainController?.moveCurtain(to: .min, animated: true)
     }
     
-    @objc func addCardAlert() {
+    
+    func addCardAlert() {
         let alert = UIAlertController(title: "Add Card", message: "Add a card before placing your order.", preferredStyle: .alert)
         let addCard = UIAlertAction(title: "Add a Card", style: .default) { (action) in
-            
+            let paymentViewController =  PaymentViewController()
+            guard let user = self.user else { return }
+            paymentViewController.userFullName = "\(user.firstName ?? "") \(user.lastName ?? "")"
+            self.navigationController?.pushViewController(paymentViewController, animated: true)
         }
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alert.addAction(addCard)
+        alert.addAction(cancel)
+        self.present(alert, animated: true, completion: nil)
+        self.proceedView.proceedButton.hideLoading()
+    }
+    
+    func clearBagAlert(orderId: String) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let addCard = UIAlertAction(title: "Clear bag", style: .destructive) { (action) in
+            DataService.shared.clearOrder(orderId: orderId) { (success, error) in
+                if !success! {
+
+                } else {
+                    self.cardState = .empty
+                    self.overView.order = nil
+                    self.order.removeAll()
+                    self.orderDetails.removeAll()
+                    self.proceedView.clearButton.hideLoading()
+                    self.adapter.performUpdates(animated: true)
+                }
+            }
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)  { (action) in
+            self.proceedView.clearButton.hideLoading()
+        }
         alert.addAction(addCard)
         alert.addAction(cancel)
         self.present(alert, animated: true, completion: nil)
@@ -272,15 +318,15 @@ extension CardViewController: CurtainDelegate {
                 self.titleViewLabel.text = "View Bag - \(quantity ?? 0)"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
-                proceedButton.isHidden = true
+                proceedView.isHidden = true
             case .mid:
                 self.navigationItem.leftBarButtonItem = cancelButton
                 collectionView.isHidden = false
-                proceedButton.isHidden = false
+                proceedView.isHidden = false
             case .max:
                 self.navigationItem.leftBarButtonItem = cancelButton
                 collectionView.isHidden = false
-                proceedButton.isHidden = false
+                proceedView.isHidden = false
             default:
                 break
             }
@@ -291,16 +337,13 @@ extension CardViewController: CurtainDelegate {
                 self.titleViewLabel.text = "View Bag"
                 emptyView.isHidden = true
                 collectionView.isHidden = true
-                proceedButton.isHidden = true
             case .mid:
                 self.navigationItem.leftBarButtonItem = cancelButton
                 emptyView.isHidden = false
                 collectionView.isHidden = true
-                proceedButton.isHidden = true
             case .max:
                 emptyView.isHidden = false
                 collectionView.isHidden = true
-                proceedButton.isHidden = true
             default:
                 break
             }

@@ -123,13 +123,9 @@ class AuthService {
                 return
             } else {
                 if let user = result?.user {
-                    print("USER ID: ", user.uid)
-                    print("PHONE NUMBER: ", phone)
                     PhoneAuthProvider.provider(auth: Auth.auth())
-
                     PhoneAuthProvider.provider().verifyPhoneNumber(phone, uiDelegate: nil) { verificationID, error in
                         if let error = error {
-                            print("ERROR:", error.localizedDescription)
                             complete(false, error)
                             return
                         } else {
@@ -137,7 +133,7 @@ class AuthService {
                             let changeRequest = user.createProfileChangeRequest()
                             changeRequest.displayName = "\(firstName) \(lastName)"
                             changeRequest.commitChanges { error in
-                                let data: [String: Any] = ["first_name": firstName, "last_name": firstName, "phone": phone]
+                                let data: [String: Any] = ["first_name": firstName, "last_name": lastName, "phone": phone]
                                 DataService.shared.saveUserDetails(userId: user.uid, data: data) { (success, error) in
                                     if !success {
                                         complete(false, error)

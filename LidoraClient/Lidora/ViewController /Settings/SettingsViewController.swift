@@ -116,6 +116,7 @@ extension SettingsViewController: UITableViewDelegate, UITableViewDataSource {
         let row = indexPath.row
         if row == 0 {
           let paymentViewController = PaymentListViewController()
+            paymentViewController.user = user
           navigationController?.pushViewController(paymentViewController, animated: true)
         } else if row == 1 {
             let paymentViewController = ChangePasswordViewController()

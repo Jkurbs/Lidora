@@ -16,7 +16,7 @@ class OverView: UIView {
     var stepper = UIStepper()
     var menu: Menu?
     var chef: Chef?
-    var orders = [Order]()
+    var order: Order?
     var arrayOfMenu = [Menu]()
     var roundedString: String?
     
@@ -123,6 +123,15 @@ class OverView: UIView {
     
     @objc func addToOrder() {
         guard let item = self.menu else { return  }
+        
+        if let providerId = order?.providerId {
+            guard chef?.id == providerId else {
+                self.showMessage("You can't order from two different chefs.", type: .info)
+                return
+            }
+        }
+
+        
         let quantity = Int(self.stepper.value)
         let total = (menu?.price)! * Double(quantity)
         NotificationCenter.default.post(name: .addToBag, object: self, userInfo: ["item": item, "total": total, "quantity": quantity])
@@ -140,5 +149,58 @@ class OverView: UIView {
                 button.setTitle("Add \(Int(stepper.value)) to bag - $\(menu.price ?? 0.0)", for: .normal)
             }
         }
+    }
+}
+
+
+class ProceedView: UIView {
+    
+    var clearButton = LoadingButton()
+    var proceedButton = LoadingButton()    
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    
+    func setupViews() {
+        backgroundColor = .white
+        
+        addSubview(proceedButton)
+        proceedButton.enable()
+        proceedButton.translatesAutoresizingMaskIntoConstraints = false
+        proceedButton.setTitle("Place Order", for: .normal)
+        proceedButton.backgroundColor = .systemGreen
+        
+        addSubview(clearButton)
+        clearButton.enable()
+        clearButton.setTitleColor(.systemRed, for: .normal)
+        clearButton.backgroundColor = .white
+        clearButton.translatesAutoresizingMaskIntoConstraints = false
+        clearButton.setTitle("Clear bag", for: .normal)
+        
+        NSLayoutConstraint.activate([
+            
+            clearButton.topAnchor.constraint(equalTo: topAnchor, constant: 8.0),
+            clearButton.widthAnchor.constraint(equalTo: widthAnchor, constant: -32),
+            clearButton.heightAnchor.constraint(equalToConstant: 45),
+            clearButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            
+            proceedButton.topAnchor.constraint(equalTo: clearButton.bottomAnchor, constant: 16.0),
+            proceedButton.widthAnchor.constraint(equalTo: clearButton.widthAnchor),
+            proceedButton.heightAnchor.constraint(equalToConstant: 60),
+            proceedButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+        ])
     }
 }

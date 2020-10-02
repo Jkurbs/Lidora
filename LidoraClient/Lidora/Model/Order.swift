@@ -20,7 +20,9 @@ class Order {
     var platformFee: Double!
     var stripeFee: Double!
     var serviceFee: Double!
+    var deliveryFee: Double!
     var total: Double!
+    var createdDate: String?
     
     init(key: String, providerId: String, providerName: String, items: [Menu]?, quantity: Int, total: Double) {
         self.id = key
@@ -42,7 +44,9 @@ class Order {
         self.platformFee = data["platform_fee"] as? Double
         self.stripeFee = data["stripe_fee"] as? Double
         self.serviceFee = data["service_fee"] as? Double
+        self.deliveryFee = data["delivery_fee"] as? Double
         self.total = data["total"] as? Double
+        self.createdDate = data["created"] as? String
         
     }
 }

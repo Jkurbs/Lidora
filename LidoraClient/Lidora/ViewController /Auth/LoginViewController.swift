@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Foundation
+import WebKit
 
 enum AuthChoice {
     case login
@@ -24,6 +24,8 @@ class AuthViewController: UIViewController {
     var phoneTextField = FieldRect()
     var passwordField = FieldRect()
     var nextButton = LoadingButton()
+    
+    var legalButton = UIButton()
     
     var authChoice = AuthChoice.login
     
@@ -87,14 +89,20 @@ class AuthViewController: UIViewController {
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
-        
+
         nextButton.setTitle("Log In", for: .normal)
         nextButton.addTarget(self, action: #selector(self.nextStep), for: .touchUpInside)
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.textChanged), name: UITextField.textDidChangeNotification, object: nil)
         nextButton.translatesAutoresizingMaskIntoConstraints = false
-        
         view.addSubview(nextButton)
+        
+        view.addSubview(legalButton)
+        legalButton.setTitle("By signing up, you agree to our Terms & Policy", for: .normal)
+        legalButton.titleLabel?.font = UIFont.systemFont(ofSize: 13)
+        legalButton.setTitleColor(.gray, for: .normal)
+        legalButton.translatesAutoresizingMaskIntoConstraints = false
+        legalButton.addTarget(self, action: #selector(self.showLegals), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
         
@@ -115,6 +123,9 @@ class AuthViewController: UIViewController {
             nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             nextButton.widthAnchor.constraint(equalTo: label.widthAnchor),
             nextButton.heightAnchor.constraint(equalToConstant: 46.0),
+            
+            legalButton.topAnchor.constraint(equalTo: nextButton.bottomAnchor, constant: 8.0),
+            legalButton.leftAnchor.constraint(equalTo: label.leftAnchor)
         ])
     }
     
@@ -164,6 +175,13 @@ class AuthViewController: UIViewController {
             navigationController?.pushViewController(vc, animated: true)
         }
     }
+    
+    @objc func showLegals() {
+        let viewController = WebViewController()
+        let nav = UINavigationController(rootViewController: viewController)
+        self.present(nav, animated: true, completion: nil)
+    }
+
     
     
     @objc func textChanged() {

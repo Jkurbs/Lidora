@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Messaging.messaging().delegate = self
         Stripe.setDefaultPublishableKey(Keys.stripe.rawValue)
 
-        Auth.auth().settings?.isAppVerificationDisabledForTesting = true
+//        Auth.auth().settings?.isAppVerificationDisabledForTesting = true
         
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]

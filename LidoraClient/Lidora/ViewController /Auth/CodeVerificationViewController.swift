@@ -80,16 +80,14 @@ class CodeVerificationViewController: UIViewController {
                     print("Error:", err.localizedDescription)
                 } else {
                     let locationViewController = LocationViewController()
+                    locationViewController.title = "Delivery Location"
+                    locationViewController.locationType = .register
                     locationViewController.title = "Location for Delivery"
                     self.navigationController?.pushViewController(locationViewController, animated: true)
-//                    let sceneDelegate = self.view.window?.windowScene?.delegate as! SceneDelegate
-//                    self.nextButton.hideLoading()
-//                    sceneDelegate.observeAuthorisedState()
                 }
             })
         }
     }
-    
     
     @objc func textChanged() {
         if textField.hasText {

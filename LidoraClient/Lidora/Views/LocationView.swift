@@ -15,6 +15,7 @@ class LocationView: UIView {
     let dateLabel = UILabel()
     let chevroImageView = UIImageView()
     
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -51,7 +52,6 @@ class LocationView: UIView {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(label)
-        label.text = "14212 NE 3RD CT"
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false

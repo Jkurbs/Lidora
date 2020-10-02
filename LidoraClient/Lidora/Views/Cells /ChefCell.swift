@@ -127,7 +127,7 @@ class ChefCell: UICollectionViewCell {
 
 
 
-        nameLabel3.text = "$2.99 Delivery Fee"
+        nameLabel3.text = "$0.30 Delivery Fee"
         nameLabel3.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         nameLabel3.textColor = .gray
         nameLabel3.translatesAutoresizingMaskIntoConstraints = false
@@ -240,6 +240,9 @@ class ChefCell: UICollectionViewCell {
     
     var chef: Chef? {
         didSet {
+            self.thumbnailImageView.sd_setImage(with: URL(string: chef?.thumbnailsURL ?? ""))
+            self.nameLabel.text = "\(chef?.firstName ?? "")"
+            self.imageView2.sd_setImage(with: URL(string: chef?.imageURL ?? ""))
             updateLike()
         }
     }
