@@ -19,14 +19,15 @@ class HeaderCell: UICollectionViewCell {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        label.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+        backgroundColor = .white
+        label.font = UIFont.systemFont(ofSize: 30, weight: .heavy)
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
         
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
             label.widthAnchor.constraint(equalTo: widthAnchor, constant: -32.0),
-            label.heightAnchor.constraint(equalTo: heightAnchor),
         ])
     }
     

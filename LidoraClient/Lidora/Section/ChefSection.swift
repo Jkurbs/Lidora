@@ -56,14 +56,17 @@ class ChefSection: ListSectionController {
     
     var menus = [Menu]()
     
+    override init() {
+        super.init()
+        self.inset = UIEdgeInsets(top: 200, left: 0, bottom: 0, right: 0)
+    }
+    
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
         if index == 0 {
-            return CGSize(width: width, height: 200)
-        } else if index == 1 {
-            return CGSize(width: width, height: 100)
+            return CGSize(width: width, height: 150)
         } else  {
-            return CGSize(width: width, height: 50)
+            return CGSize(width: width, height: 80)
         }
     }
 
@@ -72,14 +75,16 @@ class ChefSection: ListSectionController {
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
+        
+        
         if index == 0 {
-            guard let imageCell = collectionContext?.dequeueReusableCell(of: ImageCell.self, for: self, at: index) as? ImageCell else { fatalError() }
-            imageCell.imageURL = chef?.thumbnailsURL
-            return imageCell
-        } else {
             guard let titleCell = collectionContext?.dequeueReusableCell(of: TitleCell.self, for: self, at: index) as? TitleCell else { fatalError() }
             titleCell.chef = chef
             return titleCell
+        } else {
+            guard let headerCell = collectionContext?.dequeueReusableCell(of: HeaderCell.self, for: self, at: index) as? HeaderCell else { fatalError() }
+            headerCell.label.text = "Menu"
+            return headerCell
         }
     }
     

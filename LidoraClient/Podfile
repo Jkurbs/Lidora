@@ -18,6 +18,8 @@ pod 'Firebase/Messaging'
 pod 'IGListKit', '~> 4.0.0'
 pod 'IQKeyboardManagerSwift'
 pod 'SDWebImage', '~> 5.0'
+pod 'ChameleonFramework/Swift'
+
 
 
 end

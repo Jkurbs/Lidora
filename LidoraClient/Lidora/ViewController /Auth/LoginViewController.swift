@@ -167,13 +167,16 @@ class AuthViewController: UIViewController {
     }
     
     func registerNext() {
-        if let email = self.detailField.text, let phone = self.phoneTextField.text, let pwd = self.passwordField.text {
-            let vc = UsernameViewController()
-            vc.data.append(email)
-            vc.data.append(phone)
-            vc.data.append(pwd)
-            navigationController?.pushViewController(vc, animated: true)
+
+        guard let email = self.detailField.text, let phone = self.phoneTextField.text, let pwd = self.passwordField.text else {
+            return
         }
+        
+        let vc = UsernameViewController()
+        vc.data.append(email)
+        vc.data.append(phone)
+        vc.data.append(pwd)
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func showLegals() {
@@ -181,8 +184,6 @@ class AuthViewController: UIViewController {
         let nav = UINavigationController(rootViewController: viewController)
         self.present(nav, animated: true, completion: nil)
     }
-
-    
     
     @objc func textChanged() {
         if detailField.hasText && passwordField.hasText {

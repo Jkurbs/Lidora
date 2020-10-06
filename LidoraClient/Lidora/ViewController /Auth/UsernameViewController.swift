@@ -33,17 +33,12 @@ class UsernameViewController: UIViewController {
         
         view.addSubview(firstNameTextField)
         firstNameTextField.placeholder = "First name"
-        firstNameTextField.delegate = self
         firstNameTextField.setBorder()
-        firstNameTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         firstNameTextField.translatesAutoresizingMaskIntoConstraints = false
-
         
         view.addSubview(lastNameTextField)
         lastNameTextField.placeholder = "Last name"
-        lastNameTextField.delegate = self
         lastNameTextField.setBorder()
-        lastNameTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         lastNameTextField.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(errorLabel)
@@ -91,8 +86,10 @@ class UsernameViewController: UIViewController {
         
         nextButton.showLoading()
         
-        if let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = data.first, let phone = data[1] as? String,
-            let password = data.last {
+        if let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = data.first, let password = data.last {
+                
+            let phone = data[1]
+            
             AuthService.shared.createAccount(firstName: firstName, lastName: lastName, email: email, phone: "+1\(phone)", pwd: password) { _, error in
                 if let error = error {
                     NSLog("error: \(error)")
@@ -118,29 +115,5 @@ class UsernameViewController: UIViewController {
         } else {
             nextButton.disable()
         }
-    }
-}
-
-extension UsernameViewController: UITextFieldDelegate {
-    
-    @objc func textFieldDidChange(_ textField: UITextField) {
-//        if textField.hasText {
-//            let username = textField.text!.lowercased().trimmingCharacters(in: .whitespaces)
-//            DataService.shared.checkUsername(username) { success in
-//                if !success {
-//                    DispatchQueue.main.async {
-//                        self.errorLabel.text = "Username already taken"
-//                        self.nextButton.disable()
-//                        self.errorLabel.textColor = .error
-//                    }
-//                } else {
-//                    DispatchQueue.main.async {
-//                        self.errorLabel.text = "Username available"
-//                        self.nextButton.enable()
-//                        self.errorLabel.textColor = .success
-//                    }
-//                }
-//            }
-//        }
     }
 }

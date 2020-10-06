@@ -39,6 +39,8 @@ class MenuCell: UICollectionViewCell {
     
     func setupViews() {
         
+        backgroundColor = .white
+        
         addSubview(imageView)
         imageView.backgroundColor = .lightGray
         imageView.clipsToBounds = true
@@ -53,7 +55,8 @@ class MenuCell: UICollectionViewCell {
         priceLabel.font = UIFont.systemFont(ofSize: 14)
         
         addSubview(descriptionLabel)
-        descriptionLabel.textColor = .darkText
+        descriptionLabel.textColor = .lightGray
+        descriptionLabel.numberOfLines = 4
         descriptionLabel.font = UIFont.systemFont(ofSize: 13)
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -64,16 +67,17 @@ class MenuCell: UICollectionViewCell {
             imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor),
             imageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             
-            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8.0),
+            nameLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16.0),
             nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16.0),
             nameLabel.rightAnchor.constraint(equalTo: imageView.leftAnchor, constant: -16.0),
             
-            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8.0),
+            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor),
             descriptionLabel.leftAnchor.constraint(equalTo: nameLabel.leftAnchor),
             descriptionLabel.rightAnchor.constraint(equalTo: nameLabel.rightAnchor),
             
-            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 8.0),
-            priceLabel.leftAnchor.constraint(equalTo: descriptionLabel.leftAnchor)
+            priceLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 0),
+            priceLabel.leftAnchor.constraint(equalTo: descriptionLabel.leftAnchor),
+            
         ])
     }
 }

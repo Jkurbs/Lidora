@@ -24,6 +24,7 @@ extension UITextField {
         self.layer.cornerRadius = 5
         self.layer.borderWidth = 0.5
         self.layer.borderColor = UIColor.systemGray2.cgColor
+        self.font = UIFont.systemFont(ofSize: 14)
         backgroundColor = .systemGray6
     }
     

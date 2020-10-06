@@ -7,8 +7,12 @@
 
 import UIKit
 import IGListKit
+import SDWebImage
+import ChameleonFramework
 
 class MenuViewController: UIViewController {
+    
+    // MARK: - Properties
     
     var chef = [Chef]() {
         didSet {
@@ -22,6 +26,8 @@ class MenuViewController: UIViewController {
         return ListAdapter(updater: ListAdapterUpdater(), viewController: self)
     }()
     
+    var imageView = UIImageView()
+    
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
     override func viewDidLoad() {
@@ -31,26 +37,64 @@ class MenuViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        setupNavBar()
+        fetchMenu()
+        self.curtainController?.moveCurtain(to: .min, animated: false)
+    }
+    
+    func setupNavBar() {
         navigationController?.navigationBar.tintColor = .white
-        navigationController?.hidesBarsOnSwipe = true
         navigationController?.navigationBar.prefersLargeTitles = false
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = UIColor.clear
-        self.curtainController?.moveCurtain(to: .min, animated: false)
-
-        fetchMenu()
     }
     
     func setupViews() {
+        view.backgroundColor = UIColor.white
         
-        view.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
+        let gradientView = UIView()
+        gradientView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(imageView)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        
+        imageView.addSubview(gradientView)
+        
+
         view.addSubview(collectionView)
-        collectionView.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
-        collectionView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (self.curtainController?.curtain.actualHeight)!)
+        collectionView.backgroundColor = UIColor.clear
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        adapter.scrollViewDelegate = self 
         adapter.collectionView = collectionView
         adapter.dataSource = self
+        
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            imageView.heightAnchor.constraint(equalToConstant: view.frame.height/2),
+            
+            gradientView.widthAnchor.constraint(equalTo: imageView.widthAnchor),
+            gradientView.heightAnchor.constraint(equalTo: imageView.heightAnchor),
+            
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: -40),
+            collectionView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            collectionView.heightAnchor.constraint(equalTo: view.heightAnchor, constant: -80),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        let myBlock: SDExternalCompletionBlock! = { [weak self] (image: UIImage?, error: Error?, cacheType: SDImageCacheType, imageUrl: URL?) -> Void in
+            guard let self = self else { return }
+            if let img = image {
+                let color = UIColor(gradientStyle: .topToBottom, withFrame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height/2), andColors: [UIColor.clear, UIColor(averageColorFrom: img)!])
+                gradientView.backgroundColor = color
+            }
+        }
+        imageView.sd_setImage(with: URL(string: chef.first!.thumbnailsURL), placeholderImage: nil, options: .continueInBackground, completed: myBlock)
+
+        
     }
     
     func fetchMenu() {
@@ -65,6 +109,8 @@ class MenuViewController: UIViewController {
     }
 }
 
+
+// MARK: - ListAdapterDataSource
 extension MenuViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
@@ -83,10 +129,10 @@ extension MenuViewController: ListAdapterDataSource {
             }
             let sizeBlock = { (item: Any, context: ListCollectionContext?) -> CGSize in
                 guard let context = context else { return .zero }
-                return CGSize(width: context.containerSize.width, height: 90)
+                return CGSize(width: context.containerSize.width, height: 100)
             }
             let sectionController = ListSingleSectionController(cellClass: MenuCell.self, configureBlock: configureBlock, sizeBlock: sizeBlock)
-            sectionController.inset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+            sectionController.inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
             sectionController.selectionDelegate = self
             return sectionController
         }
@@ -111,5 +157,12 @@ extension MenuViewController: ListSingleSectionControllerDelegate {
                 cardViewController.cardState = .overview
             }
         }
+    }
+}
+
+extension MenuViewController: UIScrollViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        print("SCROLLING: ", scrollView.contentOffset.y)
     }
 }

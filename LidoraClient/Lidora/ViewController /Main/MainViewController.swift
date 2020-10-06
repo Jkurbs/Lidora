@@ -10,6 +10,8 @@ import IGListKit
 
 class MainViewController: UIViewController {
     
+    // MARK: - Properties
+    
     var locationView = LocationView()
     var locationService: LocationService?
     
@@ -18,7 +20,6 @@ class MainViewController: UIViewController {
     }()
     
     var collectionView: UICollectionView!
-    
     
     lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -33,11 +34,7 @@ class MainViewController: UIViewController {
     var chefs = [Chef]()
     var user: User? 
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupViews()
-        fetchChefs()
-    }
+    // MARK: - View Lifeycle
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -47,17 +44,24 @@ class MainViewController: UIViewController {
         self.curtainController?.moveCurtain(to: .min, animated: false)
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupViews()
+        fetchChefs()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false
     }
     
+    // MARK: - Functions
     
     func fetchChefs() {
         self.chefs.removeAll()
         DataService.shared.fetchChefs() { (chef, error) in
             if let error = error {
-                print("Error: ", error)
+                self.showMessage(error.localizedDescription, type: .error)
             } else {
                 DispatchQueue.main.async {
                     self.chefs.append(chef!)
@@ -67,6 +71,10 @@ class MainViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    func fetchRandomMenu() {
+        
     }
     
     
@@ -86,7 +94,6 @@ class MainViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = UIColor.tertiarySystemBackground
         collectionView.isScrollEnabled = true
-//        collectionView.scro
         collectionView.addSubview(indicator)
         view.addSubview(collectionView)
         adapter.collectionView = collectionView
@@ -139,7 +146,7 @@ extension MainViewController: LocationDelegate {
     }
 }
 
-
+// MARK: - ListAdapterDataSource
 extension MainViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
