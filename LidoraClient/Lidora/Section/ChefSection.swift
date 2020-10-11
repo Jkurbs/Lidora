@@ -38,7 +38,7 @@ class ChefAroundSection: ListSectionController {
     }
     
     override func didSelectItem(at index: Int) {
-        let menuViewController = MenuViewController()
+        let menuViewController = ProfileViewController()
         menuViewController.chef.append(chef!)
         self.viewController?.navigationController?.pushViewController(menuViewController, animated: true)
     }
@@ -59,26 +59,37 @@ class ChefSection: ListSectionController {
     override func sizeForItem(at index: Int) -> CGSize {
         let width = collectionContext!.containerSize.width
         if index == 0 {
-            return CGSize(width: width, height: 200)
+            return CGSize(width: width, height: 170)
         } else if index == 1 {
-            return CGSize(width: width, height: 100)
-        } else  {
+            return CGSize(width: width, height: 80)
+        } else {
             return CGSize(width: width, height: 50)
         }
     }
 
     override func numberOfItems() -> Int {
-        2
+        4
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
         if index == 0 {
             guard let imageCell = collectionContext?.dequeueReusableCell(of: ImageCell.self, for: self, at: index) as? ImageCell else { fatalError() }
-            imageCell.imageURL = chef?.thumbnailsURL
+            imageCell.chef = chef
             return imageCell
+        } else if index == 1 {
+            guard let titleCell = collectionContext?.dequeueReusableCell(of: TitleCell.self, for: self, at: index) as? TitleCell else { fatalError() }
+            titleCell.descriptionLabel.text = chef?.description
+            return titleCell
+        } else if index == 2 {
+            guard let titleCell = collectionContext?.dequeueReusableCell(of: InfoCell.self, for: self, at: index) as? InfoCell else { fatalError() }
+            titleCell.label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            titleCell.label.text = "Schedule"
+            return titleCell
         } else {
             guard let titleCell = collectionContext?.dequeueReusableCell(of: TitleCell.self, for: self, at: index) as? TitleCell else { fatalError() }
-            titleCell.chef = chef
+            titleCell.label.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+            titleCell.label.text = "Menu"
+            titleCell.separator.isHidden = true
             return titleCell
         }
     }
@@ -91,6 +102,7 @@ class ChefSection: ListSectionController {
         if index == 2 {
             self.viewController?.curtainController?.moveCurtain(to: .hide, animated: false)
             let scheduleViewController = ScheduleViewController()
+            scheduleViewController.providerId = chef?.id
             self.viewController?.navigationController?.pushViewController(scheduleViewController, animated: true)
         }
     }

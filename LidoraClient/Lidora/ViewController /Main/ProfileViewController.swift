@@ -8,7 +8,7 @@
 import UIKit
 import IGListKit
 
-class MenuViewController: UIViewController {
+class ProfileViewController: UIViewController {
     
     var chef = [Chef]() {
         didSet {
@@ -31,8 +31,6 @@ class MenuViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.navigationBar.tintColor = .white
-        navigationController?.hidesBarsOnSwipe = true
         navigationController?.navigationBar.prefersLargeTitles = false
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -44,8 +42,9 @@ class MenuViewController: UIViewController {
     }
     
     func setupViews() {
-        
+
         view.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
+        
         view.addSubview(collectionView)
         collectionView.backgroundColor = UIColor(red: 243.0/255.0, green: 243.0/255.0, blue: 243.0/255.0, alpha: 1.0)
         collectionView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height - (self.curtainController?.curtain.actualHeight)!)
@@ -65,7 +64,7 @@ class MenuViewController: UIViewController {
     }
 }
 
-extension MenuViewController: ListAdapterDataSource {
+extension ProfileViewController: ListAdapterDataSource {
     
     func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
         var data = chef as [ListDiffable]
@@ -99,7 +98,7 @@ extension MenuViewController: ListAdapterDataSource {
 
 // MARK: - ListSingleSectionControllerDelegate
     
-extension MenuViewController: ListSingleSectionControllerDelegate {
+extension ProfileViewController: ListSingleSectionControllerDelegate {
 
     func didSelect(_ sectionController: ListSingleSectionController, with object: Any) {
         if let menu = object as? Menu {

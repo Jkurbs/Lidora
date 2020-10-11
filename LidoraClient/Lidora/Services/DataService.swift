@@ -469,4 +469,25 @@ class DataService {
             }
         }
     }
+    
+    
+    // FETCH SCHEDULE
+    func fetchSchedule(providerId: String, complete: @escaping (Schedule) -> Void) {
+        self.RefChefs.document(providerId).collection("schedule").getDocuments { (snapshot, error) in
+            guard let snapshot = snapshot else { return }
+            print("SNAPSHOT: ", snapshot)
+            for document in snapshot.documents {
+                
+                let data = document.data()
+                
+                for day in data.keys {
+                    if let time = data[day] as? String {
+                        let schedule = Schedule(day: day, time: time)
+                        complete(schedule)
+                    }
+                }
+            }
+        }
+    }
 }
+
